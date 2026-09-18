@@ -10,6 +10,7 @@ import { AppShell } from "@/components/ecommerce/AppShell";
 import { CartDrawer } from "@/components/ecommerce/CartDrawer";
 import { ScrollProgress } from "@/components/site/ScrollProgress";
 import { RouteCurtain } from "@/components/site/RouteCurtain";
+import { SITE } from "@/lib/site";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -31,7 +32,6 @@ const body = Jost({
 });
 const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], display: "swap" });
 
-const SITE = "https://thepinkestore.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),

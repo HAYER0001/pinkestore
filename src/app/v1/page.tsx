@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import { Hero } from "@/components/motion/hero";
 import { CraftStory } from "@/components/motion/craft-story";
 import { BentoGallery } from "@/components/motion/bento-gallery";
 import { AlnaRack } from "@/components/shaili/alna-rack";
 import { ClothPanel } from "@/components/commerce/cloth-panel";
 import { getProduct, BRAND } from "@/lib/catalog";
+
+/* The original prototype of this site. Kept for reference, but it must never
+   be indexed — a search engine finding it would show people an abandoned
+   earlier version of the shop instead of this one. */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function Home() {
   const jamawar = getProduct("jamawar-indigo-kani-shawl")!;

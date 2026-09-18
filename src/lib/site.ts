@@ -1,5 +1,8 @@
 import { BRAND, CRAFTS, type Craft } from "./catalog";
 
+/** Canonical origin. robots.ts, sitemap.ts and the root metadata all read it. */
+export const SITE = "https://thepinkestore.com";
+
 /**
  * THE INFORMATION ARCHITECTURE.
  *
