@@ -16,6 +16,11 @@ import { useEffect, useRef, useState } from "react";
 export function PerfHUD({ particles }: { particles: number }) {
   const [fps, setFps] = useState(0);
   const [worst, setWorst] = useState(0);
+  /* dpr must not be read during render: the server has no window, so it emits
+     "—" while the client emits "2" and React reports a hydration mismatch.
+     Read it after mount instead. */
+  const [dpr, setDpr] = useState<number | null>(null);
+  useEffect(() => setDpr(Math.min(window.devicePixelRatio || 1, 2)), []);
   const frames = useRef(0);
   const last = useRef(performance.now());
   const worstRef = useRef(0);
@@ -63,8 +68,7 @@ export function PerfHUD({ particles }: { particles: number }) {
     >
       {fps} FPS · worst {worst}ms
       <br />
-      {particles.toLocaleString()} particles · dpr{" "}
-      {typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) : "—"}
+      {particles.toLocaleString()} particles · dpr {dpr ?? "—"}
     </div>
   );
 }

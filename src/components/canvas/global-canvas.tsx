@@ -1,9 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import { MadhubaniParticles, particleBudget } from "./MadhubaniParticles";
 import { PerfHUD } from "./perf-hud";
+import { CinematicScrubber } from "./CinematicScrubber";
 
 /**
  * THE GLOBAL CANVAS.
@@ -16,10 +19,14 @@ import { PerfHUD } from "./perf-hud";
  * pixels and is the single most common cause of a mobile WebGL build melting.
  */
 export function GlobalCanvas() {
-  const showHud = process.env.NODE_ENV === "development";
+  /* Same hydration trap as the HUD: particleBudget() reads window, so it must
+     not run during render. Mount-gate it. */
+  const [budget, setBudget] = useState<number | null>(null);
+  useEffect(() => setBudget(particleBudget()), []);
+  const showHud = process.env.NODE_ENV === "development" && budget !== null;
   return (
     <>
-    {showHud && <PerfHUD particles={particleBudget()} />}
+    {showHud && <PerfHUD particles={budget} />}
     <div
       aria-hidden
       style={{
@@ -46,6 +53,7 @@ export function GlobalCanvas() {
           gl.toneMapping = THREE.ACESFilmicToneMapping;
         }}
       >
+        <CinematicScrubber />
         <MadhubaniParticles />
       </Canvas>
     </div>

@@ -202,6 +202,7 @@
     /* TRANSPARENT so the fixed WebGL canvas at z-index -1 reads through.
        An opaque body here silently hides the entire 3D scene. */
     background-color: transparent;
+    min-height: 100svh;
     color: var(--pk-fg);
     font-family: var(--font-sans);
     font-feature-settings: "cv11", "ss01";

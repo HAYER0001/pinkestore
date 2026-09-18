@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { SIMPLEX_3D } from "./shaders/noise.glsl";
+import { scrubStore } from "@/utils/animations/scrub-store";
 
 /**
  * MADHUBANI PARTICLES — gold dust and floating thread.
@@ -33,6 +34,7 @@ uniform float uPixelRatio;
 uniform float uRepelRadius;
 uniform float uRepelStrength;
 uniform float uSizeScale;
+uniform float uReveal;   // 0 = dust everywhere, 1 = parted to the edges
 
 attribute float aSize;
 attribute float aSpeed;
@@ -42,6 +44,7 @@ attribute float aPhase;
 varying float vMix;
 varying float vTwinkle;
 varying float vPush;
+varying float vReveal;
 
 void main() {
   vec3 origin = position;
@@ -80,6 +83,18 @@ void main() {
   drifted += dir * push * uRepelStrength;
   vPush = push;
 
+  // ---- the parting -----------------------------------------------------
+  // As the sequence begins the field opens outward from the centre, so the
+  // particles become a border around the footage rather than fog on top of
+  // it. Pushed along the XY radial so depth is preserved.
+  vec2  radial = drifted.xy;
+  float rlen   = length(radial) + 0.0001;
+  vec2  rdir   = radial / rlen;
+  // particles already near the edge move least — the centre clears first
+  float clearAmount = (1.0 - smoothstep(0.0, 13.0, rlen)) * uReveal;
+  drifted.xy += rdir * clearAmount * 11.0;
+  vReveal = uReveal;
+
   vec4 mvPosition = modelViewMatrix * vec4(drifted, 1.0);
   gl_Position = projectionMatrix * mvPosition;
 
@@ -106,6 +121,7 @@ uniform vec3 uCream;
 varying float vMix;
 varying float vTwinkle;
 varying float vPush;
+varying float vReveal;
 
 void main() {
   // distance from the centre of the point sprite
@@ -129,7 +145,9 @@ void main() {
   // scattered particles brighten toward cream as they are pushed
   c = mix(c, uCream, vPush * 0.6);
 
-  float alpha = disc * vTwinkle * (0.55 + vPush * 0.45);
+  // dust recedes as the footage takes over, but never fully — a thin veil of
+  // gold over the cloth is the whole point
+  float alpha = disc * vTwinkle * (0.55 + vPush * 0.45) * (1.0 - vReveal * 0.62);
 
   gl_FragColor = vec4(c, alpha);
 }
@@ -219,6 +237,7 @@ export function MadhubaniParticles() {
           uRepelRadius: { value: 3.4 },
           uRepelStrength: { value: 2.2 },
           uSizeScale: { value: 1 },
+          uReveal: { value: 0 },
           uGold: { value: new THREE.Color("#D4AF37") },
           uRed: { value: new THREE.Color("#8B3A3A") },
           uCream: { value: new THREE.Color("#FAF8F5") },
@@ -260,6 +279,10 @@ export function MadhubaniParticles() {
     const raw = Math.min(Math.abs(lenis?.velocity ?? 0) / 900, 1);
     scrollSmooth.current += (raw - scrollSmooth.current) * Math.min(1, delta * 4);
     u.uScroll.value = scrollSmooth.current;
+
+    /* the field parts over the first 18% of the track, then holds open */
+    const reveal = Math.min(scrubStore.getProgress() / 0.18, 1);
+    u.uReveal.value += (reveal - u.uReveal.value) * Math.min(1, delta * 3);
   });
 
   /* ---------- GPU teardown ----------

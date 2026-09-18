@@ -44,7 +44,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         PageShell wrapper (which animated `scale` and `filter`) is not mounted
         on this layout: it would have silently broken every blend mode.
       */}
-      <body style={{ background: "transparent", minHeight: "100svh" }}>
+      {/* NO inline style on <body>. React 19 serialises the style prop
+          camelCase client-side and kebab-case into the SSR attribute, and
+          reports the difference as a hydration mismatch no matter which form
+          you write. Body styling lives in globals.css instead. */}
+      <body>
         <GlobalCanvas />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
