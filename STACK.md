@@ -51,10 +51,14 @@ npx skills add https://github.com/pbakaus/impeccable --skill impeccable
 
 | Package | Purpose |
 |---|---|
-| `motion` | Framer Motion's successor — the animation engine everything else builds on |
-| `tsparticles` + `@tsparticles/react` | Optimized interactive particle backgrounds |
-| `clsx` + `tailwind-merge` | Class composition (`cn()` helper) |
+| `motion` ^13 | Framer Motion's successor — the animation engine everything else builds on |
+| `tsparticles` + `@tsparticles/react` + `@tsparticles/slim` | Optimized interactive particle backgrounds |
+| `cn` (via `@/lib/utils`) | Class composition — shadcn 4.x now ships this as a package |
 | `lucide-react` | Icon set — real icons, never emoji |
+| `shadcn` | Component registry CLI — also how Motion Primitives is pulled in |
+
+Initialized with `components.json` → style `base-nova`, base color **neutral**, CSS variables on.
+Neutral (not slate/stone) is deliberate — it matches the `taste` color rules.
 
 **Motion Primitives** (<https://motion-primitives.com>) is copy-in, not a dependency. Pull a
 component when you need it:
@@ -62,6 +66,9 @@ component when you need it:
 ```bash
 npx shadcn@latest add "https://motion-primitives.com/c/text-effect.json"
 ```
+
+Verified working — `text-effect` is already pulled into `src/components/ui/` as a smoke test.
+Delete it if unused. Note the CLI exits `1` after a successful add; the files still land.
 
 ## 4. Generators (browser tools, no install)
 

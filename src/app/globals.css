@@ -1,26 +1,492 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================================
+   THE PINKESTORE — DESIGN TOKENS
+   Every colour below is derived from the actual product photography, not
+   invented. Madder red and blush are the SAME hue at opposite ends of one
+   ramp: the red IS the pink. That is why "monochrome base + one accent"
+   and a brand called The Pinkestore are not in conflict.
+
+   Two namespaces, deliberately separated:
+     --pk-*       UI chrome. Restrained. Accent appears <= 3x per viewport.
+     --pigment-*  Illustration only. Used inside SVG motifs, never on UI.
+   ========================================================================= */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --pk-bg: #FAF8F4; /* Page background */
+  --pk-bg-subtle: #F3F0E9; /* Alternating section band — the 'Art of Madhubani' storytelli */
+  --pk-surface: #FEFDFB; /* Product tile, form field, static card */
+  --pk-surface-raised: #FFFEFC; /* Cart slide-out, modal, dropdown, admin data-table header */
+  --pk-border: #E8E6E2; /* Hairline, 1px */
+  --pk-border-strong: #DBD9D5; /* 14% light / 16% dark */
+  --pk-fg: #1B1916; /* Body ink */
+  --pk-fg-muted: #5C574F; /* Secondary text: product subtitles, craft provenance line, ca */
+  --pk-fg-subtle: #8A847A; /* Placeholders, disabled labels, timestamps, breadcrumb separa */
+  --pk-accent: #8A2F3B; /* THE accent, foreground form */
+  --pk-accent-solid: #73202A; /* Primary button fill — Add to Bag, Checkout, admin Save */
+  --pk-accent-solid-hover: #5B1620; /* Hover */
+  --pk-accent-solid-active: #4A1119; /* Pressed */
+  --pk-on-accent: #FDF6F4; /* Text/icon on any solid accent fill */
+  --pk-tint-blush: #F2EAE7; /* THE PINK */
+  --pk-tint-blush-border: #EBDEDC; /* 13% / 22% accent over bg */
+  --pk-ivory: #E0D9D1; /* Sampled verbatim from the Madhubani shawl ground */
+  --pk-charcoal: #4A4C50; /* The studio wall, sampled verbatim, also mode-invariant */
+  --pigment-madder: #8A2F3B; /* ILLUSTRATION PIGMENT — SVG only, never UI chrome */
+  --pigment-haldi: #8A6812; /* Illustration pigment */
+  --pigment-teal: #0C7482; /* Illustration pigment */
+  --pigment-indigo: #2F3A78; /* Illustration pigment */
+  --pigment-aubergine: #5B2468; /* Illustration pigment */
+  --pigment-sindoor: #A83A24; /* Illustration pigment */
+  --pk-success: #146B52; /* Order placed, in stock, payment captured */
+  --pk-warning: #8A6812; /* Low stock, pending shipment */
+  --pk-danger: #A83A24; /* Payment failed, remove from cart, destructive admin action */
+  --pk-focus-ring: #8A2F3B; /* Aliases --pk-accent */
+  /* --- Spacing: 4px base --- */
+  --pk-unit: 4px;
+
+  /* --- Motion: house curve + springs --- */
+  --pk-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --pk-dur-fast: 150ms;
+  --pk-dur: 200ms;
+  --pk-dur-slow: 280ms;
+
+  /* --- Ornament geometry (kachni double-line) --- */
+  --kachni-outer: 3.2;
+  --kachni-inner: 1.2;
+
+  --radius: 0.375rem;
+
+  /* --- shadcn bridge: map its semantics onto our tokens --- */
+  --background: var(--pk-bg);
+  --foreground: var(--pk-fg);
+  --card: var(--pk-surface);
+  --card-foreground: var(--pk-fg);
+  --popover: var(--pk-surface-raised);
+  --popover-foreground: var(--pk-fg);
+  --primary: var(--pk-accent-solid);
+  --primary-foreground: var(--pk-on-accent);
+  --secondary: var(--pk-bg-subtle);
+  --secondary-foreground: var(--pk-fg);
+  --muted: var(--pk-bg-subtle);
+  --muted-foreground: var(--pk-fg-muted);
+  --accent: var(--pk-tint-blush);
+  --accent-foreground: var(--pk-fg);
+  --destructive: var(--pk-danger);
+  --border: var(--pk-border);
+  --input: var(--pk-border-strong);
+  --ring: var(--pk-focus-ring);
 }
+
+.dark {
+  --pk-bg: #101216;
+  --pk-bg-subtle: #15181D;
+  --pk-surface: #1A1E24;
+  --pk-surface-raised: #232830;
+  --pk-border: #2A2D33;
+  --pk-border-strong: #383B41;
+  --pk-fg: #EDEAE4;
+  --pk-fg-muted: #A3A7AF;
+  --pk-fg-subtle: #787D86;
+  --pk-accent: #E79AA3;
+  --pk-accent-solid: #BE4150;
+  --pk-accent-solid-hover: #C24654;
+  --pk-accent-solid-active: #B83B4A;
+  --pk-on-accent: #FFF4F3;
+  --pk-tint-blush: #261A1F;
+  --pk-tint-blush-border: #392127;
+  --pk-ivory: #E0D9D1;
+  --pk-charcoal: #4A4C50;
+  --pigment-madder: #C95563;
+  --pigment-haldi: #D6A93C;
+  --pigment-teal: #45B3BE;
+  --pigment-indigo: #8B95DA;
+  --pigment-aubergine: #B481C4;
+  --pigment-sindoor: #E08468;
+  --pk-success: #4FBF93;
+  --pk-warning: #D6A93C;
+  --pk-danger: #E08468;
+  --pk-focus-ring: #E79AA3;}
+
+/* ============================================================================
+   TAILWIND v4 THEME BRIDGE
+   Exposes tokens as utilities: bg-pk-bg, text-pk-fg-muted, border-pk-border...
+   ========================================================================= */
 
 @theme inline {
+  --color-pk-bg: var(--pk-bg);
+  --color-pk-bg-subtle: var(--pk-bg-subtle);
+  --color-pk-surface: var(--pk-surface);
+  --color-pk-surface-raised: var(--pk-surface-raised);
+  --color-pk-border: var(--pk-border);
+  --color-pk-border-strong: var(--pk-border-strong);
+  --color-pk-fg: var(--pk-fg);
+  --color-pk-fg-muted: var(--pk-fg-muted);
+  --color-pk-fg-subtle: var(--pk-fg-subtle);
+  --color-pk-accent: var(--pk-accent);
+  --color-pk-accent-solid: var(--pk-accent-solid);
+  --color-pk-accent-solid-hover: var(--pk-accent-solid-hover);
+  --color-pk-accent-solid-active: var(--pk-accent-solid-active);
+  --color-pk-on-accent: var(--pk-on-accent);
+  --color-pk-tint-blush: var(--pk-tint-blush);
+  --color-pk-tint-blush-border: var(--pk-tint-blush-border);
+  --color-pk-ivory: var(--pk-ivory);
+  --color-pk-charcoal: var(--pk-charcoal);
+  --color-pk-success: var(--pk-success);
+  --color-pk-warning: var(--pk-warning);
+  --color-pk-danger: var(--pk-danger);
+
+  --color-pigment-madder: var(--pigment-madder);
+  --color-pigment-haldi: var(--pigment-haldi);
+  --color-pigment-teal: var(--pigment-teal);
+  --color-pigment-indigo: var(--pigment-indigo);
+  --color-pigment-aubergine: var(--pigment-aubergine);
+  --color-pigment-sindoor: var(--pigment-sindoor);
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --ease-pk: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* shadcn bridge */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ============================================================================
+   BASE
+   ========================================================================= */
+
+@layer base {
+  * {
+    @apply border-pk-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--pk-bg);
+    color: var(--pk-fg);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Display face. WONK only above 48px, SOFT 0, weight never past 500 —
+     past those limits Fraunces reads artisanal-bakery, not luxury. */
+  .font-display {
+    font-family: var(--font-display);
+    font-variation-settings: "SOFT" 0, "WONK" 0;
+    font-weight: 400;
+  }
+
+  .font-display-wonk {
+    font-family: var(--font-display);
+    font-variation-settings: "SOFT" 0, "WONK" 1;
+    font-weight: 400;
+  }
+
+  /* Mixed-script product titles need 1.35 — Devanagari's shirorekha and
+     Gurmukhi's descenders clip at 1.2. */
+  :lang(hi),
+  :lang(pa) {
+    line-height: 1.35;
+  }
+
+  ::selection {
+    background-color: var(--pk-accent-solid);
+    color: var(--pk-on-accent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--pk-focus-ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================================
+   TYPE SCALE — negative tracking scales with size, per house rules
+   ========================================================================= */
+
+@layer utilities {
+  .t-hero    { font-size: clamp(2.75rem, 7vw, 6rem);   line-height: 1.02; letter-spacing: -0.035em; }
+  .t-display { font-size: clamp(2.25rem, 5vw, 3.75rem); line-height: 1.06; letter-spacing: -0.03em; }
+  .t-title   { font-size: clamp(1.5rem, 3vw, 2.25rem);  line-height: 1.12; letter-spacing: -0.022em; }
+  .t-heading { font-size: 1.25rem;  line-height: 1.25; letter-spacing: -0.014em; }
+  .t-body    { font-size: 1rem;     line-height: 1.6;  letter-spacing: 0; }
+  .t-small   { font-size: 0.875rem; line-height: 1.55; letter-spacing: 0; }
+  .t-micro   { font-size: 0.75rem;  line-height: 1.4;  letter-spacing: 0.02em; text-transform: uppercase; }
+
+  .measure { max-width: 65ch; }
+}
+
+/* ============================================================================
+   ORNAMENT — kachni sandwich stroke classes
+   Ink and ground are overridable per context so a band can sit on indigo.
+   ========================================================================= */
+
+@layer components {
+  .pk-ink {
+    fill: none;
+    stroke: var(--kachni-ink, var(--pk-fg));
+    stroke-linecap: butt;
+    stroke-linejoin: round;
+  }
+
+  .pk-ground {
+    fill: none;
+    stroke: var(--kachni-ground, var(--pk-bg));
+    stroke-linecap: butt;
+    stroke-linejoin: round;
+  }
+
+  .pk-fill-ink {
+    fill: var(--kachni-ink, var(--pk-fg));
+    stroke: none;
+  }
+
+  /* The lattice must stay a whisper — it sits behind everything, always. */
+  .pk-hair {
+    fill: none;
+    stroke: var(--kachni-ink, var(--pk-fg));
+    stroke-width: 1;
+    opacity: 0.11;
+  }
+
+  /* Band colourways */
+  .pk-on-ivory {
+    --kachni-ink: var(--pk-fg);
+    --kachni-ground: var(--pk-bg);
+  }
+  .pk-on-indigo {
+    --kachni-ink: var(--pk-ivory);
+    --kachni-ground: var(--pigment-indigo);
+  }
+  .pk-on-madder {
+    --kachni-ink: var(--pk-on-accent);
+    --kachni-ground: var(--pk-accent-solid);
+  }
+}
+
+/* ============================================================================
+   MAXIMALIST SURFACES
+   The shop sells dense, saturated, edge-to-edge cloth. The site is built the
+   same way: deep grounds, pattern at full strength, gold as a real material.
+   Restraint is not the brief here — weave is.
+   ========================================================================= */
+
+@layer components {
+  .ground-indigo {
+    --kachni-ink: var(--pk-ivory);
+    --kachni-ground: #222A5C;
+    --surface-ink: var(--pk-ivory);
+    --surface-gold: #E8BC57;
+    background: #2A3470;
+    color: var(--pk-ivory);
+  }
+
+  .ground-madder {
+    --kachni-ink: #F0DCCF;
+    --kachni-ground: #4A1119;
+    --surface-ink: #F0DCCF;
+    --surface-gold: #E8BC57;
+    background: #5B1620;
+    color: #F0DCCF;
+  }
+
+  .ground-ink {
+    --kachni-ink: var(--pk-ivory);
+    --kachni-ground: #14110F;
+    --surface-ink: var(--pk-ivory);
+    --surface-gold: #E8BC57;
+    background: #1A1512;
+    color: var(--pk-ivory);
+  }
+
+  .ground-ivory {
+    --kachni-ink: #2A1F1A;
+    --kachni-ground: var(--pk-bg);
+    --surface-ink: #2A1F1A;
+    --surface-gold: #8A6812;
+    background: var(--pk-bg);
+    color: var(--pk-fg);
+  }
+
+  /* Pattern at FULL strength. This is the point — the field is woven, not
+     tinted. The old 0.11 whisper read as a beige site with garnish. */
+  .lattice-full {
+    fill: none;
+    stroke: var(--kachni-ink, var(--pk-fg));
+    stroke-width: 1.2;
+    opacity: 0.34;
+  }
+  .lattice-gold {
+    fill: none;
+    stroke: var(--surface-gold, #E8BC57);
+    stroke-width: 1.2;
+    opacity: 0.3;
+  }
+
+  .ink-gold {
+    --kachni-ink: var(--surface-gold, #E8BC57);
+  }
+
+  .t-ornament {
+    font-family: var(--font-display);
+    font-variation-settings: "SOFT" 0, "WONK" 1;
+    font-weight: 500;
+  }
+}
+
+@layer components {
+  /* The frame is its own world: gold ink on a dark ground, everywhere. */
+  .ink-gold {
+    --kachni-ink: #E8BC57;
+    --kachni-ground: #17120F;
+  }
+}
+
+/* ============================================================================
+   HARD SYSTEM — extracted from the reference teardown.
+   The single tell that separates this from generic soft UI: shadows are a
+   HARD OFFSET with ZERO BLUR. Nothing here is allowed a blur radius.
+   Type is compressed to 10-24px; hierarchy comes from weight, case and colour,
+   never from size. Motion is 50-200ms — fast enough to feel mechanical.
+   ========================================================================= */
+
+:root {
+  /* offset shadows — no blur, ever */
+  --sh-1: 1.5px 1.5px 0 0 var(--sh-color, #000);
+  --sh-2: 2px 2px 0 0 var(--sh-color, #000);
+  --sh-3: 3px 3px 0 0 var(--sh-color, #000);
+  --sh-4: 6px 6px 0 0 var(--sh-color, #000);
+
+  /* compressed scale */
+  --fs-xs: 10px;
+  --fs-sm: 11px;
+  --fs-md: 12px;
+  --fs-lg: 14px;
+  --fs-xl: 16px;
+  --fs-2xl: 18px;
+  --fs-3xl: 20px;
+  --fs-4xl: 24px;
+
+  /* spacing */
+  --sp-1: 3px;
+  --sp-2: 4px;
+  --sp-3: 6px;
+  --sp-4: 8px;
+  --sp-5: 12px;
+  --sp-6: 16px;
+  --sp-7: 24px;
+  --sp-8: 48px;
+
+  --r-xs: 3px;
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 14px;
+
+  --d-instant: 50ms;
+  --d-fast: 100ms;
+  --d-normal: 150ms;
+  --d-slow: 200ms;
+  --d-slower: 700ms;
+}
+
+@layer components {
+  /* The card. Hard border, hard offset shadow, no blur, no gradient. */
+  .hard {
+    border: 2px solid var(--hard-ink, #000);
+    box-shadow: var(--sh-3);
+    border-radius: var(--r-xs);
+    --sh-color: var(--hard-ink, #000);
+  }
+  .hard-sm { box-shadow: var(--sh-1); }
+  .hard-lg { box-shadow: var(--sh-4); }
+
+  /* Press = the shadow collapses and the element moves into it. Mechanical,
+     not springy. This is the whole feel of the reference. */
+  .hard-press {
+    transition:
+      box-shadow var(--d-fast) linear,
+      transform var(--d-fast) linear;
+  }
+  .hard-press:hover { transform: translate(-1px, -1px); box-shadow: var(--sh-4); }
+  .hard-press:active { transform: translate(3px, 3px); box-shadow: 0 0 0 0 var(--sh-color, #000); }
+
+  /* Monospace chip label: [ शैली ०२ · WARLI ] */
+  .chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: var(--sp-2) var(--sp-5);
+    border: 2px solid var(--hard-ink, #000);
+    border-radius: var(--r-xs);
+    box-shadow: var(--sh-1);
+    --sh-color: var(--hard-ink, #000);
+  }
+
+  /* Graph-paper ground — the reference grids every coloured surface. */
+  .graph {
+    background-image:
+      linear-gradient(to right, var(--graph-line, rgba(0, 0, 0, 0.12)) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--graph-line, rgba(0, 0, 0, 0.12)) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  /* Torn lower edge, like a note ripped from a pad. */
+  .torn-bottom {
+    -webkit-mask-image: linear-gradient(#000 0 0),
+      conic-gradient(from -45deg at bottom, #0000 25%, #000 0);
+    -webkit-mask-size: 100% calc(100% - 9px), 18px 9px;
+    -webkit-mask-repeat: no-repeat, repeat-x;
+    -webkit-mask-position: top, bottom;
+    mask-image: linear-gradient(#000 0 0),
+      conic-gradient(from -45deg at bottom, #0000 25%, #000 0);
+    mask-size: 100% calc(100% - 9px), 18px 9px;
+    mask-repeat: no-repeat, repeat-x;
+    mask-position: top, bottom;
+  }
 }

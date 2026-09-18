@@ -1,69 +1,132 @@
-import Image from "next/image";
+import Link from "next/link";
+import { StoryScroll } from "@/components/ornament/story-scroll";
+import { ShailiHero } from "@/components/shaili/shaili-hero";
+import { AlnaRack } from "@/components/shaili/alna-rack";
+import { Lattice } from "@/components/ornament/lattice";
+import { OrnateFrame } from "@/components/ornament/ornate-frame";
+import { Band } from "@/components/ornament/band";
+import { Reveal } from "@/components/ornament/reveal";
+import { ClothPanel } from "@/components/commerce/cloth-panel";
+import { ProductCard } from "@/components/commerce/product-card";
+import { PRODUCTS, CRAFTS, BRAND, getProduct, type Craft } from "@/lib/catalog";
+
+const CRAFT_ORDER: Craft[] = [
+  "madhubani-hand-painted",
+  "sozni-hand-embroidered",
+  "jamawar-kani",
+  "lucknowi-chikankari",
+  "kairi-print",
+];
 
 export default function Home() {
+  const inStock = PRODUCTS.filter((p) => p.stock > 0);
+  const madhubani = getProduct("madhubani-baraat-shawl")!;
+  const jamawar = getProduct("jamawar-indigo-kani-shawl")!;
+  const sozni = getProduct("sozni-ivory-pashmina")!;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="flex-1">
+      <ShailiHero />
+
+      {/* ============ 2 · THE STORY — illustrated, one timeline ============ */}
+      <StoryScroll />
+
+      {/* ============ 3 · CLOTH — photographic ============ */}
+      <ClothPanel product={madhubani} ground="ground-madder" kicker="One of one" />
+
+      {/* ============ 4 · CLOTH — photographic ============ */}
+      <ClothPanel
+        product={jamawar}
+        ground="ground-ink"
+        align="right"
+        kicker="Woven, not printed"
+      />
+
+      <div id="pieces" className="scroll-mt-20">
+        <AlnaRack />
+      </div>
+
+      {/* ============ 6 · CLOTH — photographic ============ */}
+      <ClothPanel product={sozni} ground="ground-indigo" kicker="Months of needlework" />
+
+      {/* ============ 7 · CRAFT — illustrated ============ */}
+      <section className="ground-madder relative overflow-hidden">
+        <Lattice />
+        <div className="relative mx-auto max-w-7xl px-4 py-20 md:px-8 md:py-28">
+          <h2 className="t-ornament t-display" style={{ color: "var(--surface-ink)" }}>
+            Four traditions, one shop
+          </h2>
+          <p
+            className="measure t-body mt-4"
+            style={{ color: "var(--surface-ink)", opacity: 0.82 }}
+          >
+            None of these crafts are from Punjab. We are in {BRAND.city}; the cloth
+            comes from Mithila, from Kashmir, from Lucknow. We say which is which,
+            because the difference is the whole point.
           </p>
+          <div className="my-10 ink-gold">
+            <Band variant="kairi" />
+          </div>
+
+          <dl className="grid gap-10 sm:grid-cols-2">
+            {CRAFT_ORDER.map((key) => {
+              const c = CRAFTS[key];
+              const count = PRODUCTS.filter((p) => p.craft === key).length;
+              return (
+                <Reveal key={key}>
+                  <div
+                    className="border-l-2 pl-6"
+                    style={{ borderColor: "var(--surface-gold)" }}
+                  >
+                    <dt className="t-ornament t-heading" style={{ color: "var(--surface-ink)" }}>
+                      {c.label}
+                    </dt>
+                    <p className="t-micro mt-1" style={{ color: "var(--surface-gold)" }}>
+                      {c.region} · {count} piece{count === 1 ? "" : "s"}
+                      {c.handmade ? "" : " · printed"}
+                    </p>
+                    <dd
+                      className="measure t-small mt-3"
+                      style={{ color: "var(--surface-ink)", opacity: 0.78 }}
+                    >
+                      {c.technique}
+                    </dd>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </dl>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* ============ 8 · FOOTER ============ */}
+      <footer className="ground-ink relative overflow-hidden">
+        <Lattice variant="gold" />
+        <div className="relative mx-auto max-w-7xl px-4 py-16 md:px-8">
+          <div className="flex flex-wrap items-end justify-between gap-8">
+            <div>
+              <p className="t-ornament t-title" style={{ color: "var(--pk-ivory)" }}>
+                {BRAND.name}
+              </p>
+              <p className="t-small mt-2" style={{ color: "var(--pk-ivory)", opacity: 0.66 }}>
+                {BRAND.city}, {BRAND.state}, {BRAND.country}
+              </p>
+            </div>
+            <a
+              href={BRAND.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="t-small underline underline-offset-4"
+              style={{ color: "var(--surface-gold)" }}
+            >
+              Instagram
+            </a>
+          </div>
+          <div className="mt-10 ink-gold">
+            <Band variant="wheat-lotus" />
+          </div>
         </div>
-      </main>
-    </div>
+      </footer>
+    </main>
   );
 }

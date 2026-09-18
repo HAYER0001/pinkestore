@@ -1,0 +1,955 @@
+// ============================================================================
+//  The Pinkestore — Prisma schema
+//  Postgres (Neon) · Prisma 7 · Next.js 16 App Router + Server Actions
+//
+//  Design notes that drive this file:
+//   1. Merchandise is one-of-a-kind handmade textile. Oversell is the cardinal
+//      sin, so stock is guarded by an explicit reservation table + a DB CHECK
+//      constraint, not by optimistic application logic.
+//   2. Every Product has >= 1 ProductVariant, even a shawl with no options.
+//      That single "default" variant keeps stock, price and order lines on ONE
+//      code path instead of two nullable ones. (Shopify uses the same trick.)
+//   3. Money is INR paise as Int. Never Float.
+//   4. Anything a customer bought is SNAPSHOTTED onto the order. Products get
+//      renamed and repriced; invoices must not change retroactively.
+//   5. Auth tables are owned by Better Auth but live in OUR database, so
+//      Order.userId is a real foreign key.
+// ============================================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // NOTE (Prisma 7): the connection URL is NOT declared here any more.
+  // It lives in prisma7.config.ts -> datasource.url.
+}
+
+// ============================================================================
+//  AUTH  (Better Auth core tables + phoneNumber & admin plugin columns)
+// ============================================================================
+
+enum UserRole {
+  CUSTOMER
+  ADMIN // the owner; may reach /admin
+}
+
+model User {
+  id            String    @id @default(cuid(2))
+  name          String?
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+
+  // Better Auth `phoneNumber` plugin. Kept separate from Order.phone on
+  // purpose: this is a LOGIN credential, the order one is a DELIVERY fact.
+  phoneNumber         String?  @unique
+  phoneNumberVerified Boolean  @default(false)
+
+  // Better Auth `admin` plugin
+  role       UserRole  @default(CUSTOMER)
+  banned     Boolean   @default(false)
+  banReason  String?
+  banExpires DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions  Session[]
+  accounts  Account[]
+  addresses Address[]
+  carts     Cart[]
+  orders    Order[]
+
+  @@index([role])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid(2))
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+
+  // Better Auth `admin` plugin: owner impersonating a customer for support
+  impersonatedBy String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("session")
+}
+
+model Account {
+  id         String  @id @default(cuid(2))
+  accountId  String // provider's own user id
+  providerId String // "credential" | "google" | ...
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String? // argon2/scrypt hash, credential provider only
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@map("account")
+}
+
+/// Email magic-links, email OTP and phone OTP all land here.
+model Verification {
+  id         String   @id @default(cuid(2))
+  identifier String // email address or E.164 phone
+  value      String // hashed token / OTP
+  expiresAt  DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([identifier])
+  @@index([expiresAt])
+  @@map("verification")
+}
+
+// ============================================================================
+//  ADDRESSES  (Indian shape)
+// ============================================================================
+
+/// India has 28 states + 8 union territories. This is an enum rather than a
+/// free string because GST place-of-supply rules key off it: an order shipped
+/// inside Punjab is CGST+SGST, anywhere else is IGST. A typo'd state string
+/// would silently produce a wrong tax invoice.
+enum IndianState {
+  ANDHRA_PRADESH
+  ARUNACHAL_PRADESH
+  ASSAM
+  BIHAR
+  CHHATTISGARH
+  GOA
+  GUJARAT
+  HARYANA
+  HIMACHAL_PRADESH
+  JHARKHAND
+  KARNATAKA
+  KERALA
+  MADHYA_PRADESH
+  MAHARASHTRA
+  MANIPUR
+  MEGHALAYA
+  MIZORAM
+  NAGALAND
+  ODISHA
+  PUNJAB
+  RAJASTHAN
+  SIKKIM
+  TAMIL_NADU
+  TELANGANA
+  TRIPURA
+  UTTAR_PRADESH
+  UTTARAKHAND
+  WEST_BENGAL
+  ANDAMAN_AND_NICOBAR_ISLANDS
+  CHANDIGARH
+  DADRA_AND_NAGAR_HAVELI_AND_DAMAN_AND_DIU
+  DELHI
+  JAMMU_AND_KASHMIR
+  LADAKH
+  LAKSHADWEEP
+  PUDUCHERRY
+}
+
+/// A customer's reusable address book entry. MUTABLE — the customer may edit
+/// or delete it. Orders therefore never point at this; they copy it.
+model Address {
+  id String @id @default(cuid(2))
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fullName String
+  /// E.164, e.g. +919876543210. Effectively mandatory: Indian couriers call
+  /// before delivery and will RTO a parcel they cannot reach.
+  phone    String
+
+  line1 String
+  line2 String?
+  /// "opposite Verka milk plant" — Indian couriers navigate by landmark far
+  /// more than by street address.
+  landmark String?
+  city     String
+  state    IndianState
+  /// 6 digits. Validate /^[1-9][0-9]{5}$/ in Zod, not here.
+  pinCode  String
+  country  String      @default("IN")
+
+  isDefault Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("address")
+}
+
+// ============================================================================
+//  CATALOG TAXONOMY
+// ============================================================================
+
+/// Structural, so an enum: these change only when the business changes shape.
+enum ProductCategory {
+  SHAWL
+  SUIT_SET
+  DUPATTA
+  STOLE
+}
+
+/// Craft/technique is a TABLE, not an enum, because the owner must be able to
+/// add "Phulkari" or "Bandhani" from /admin without a developer and a deploy.
+/// It also carries its own story copy, which feeds the "Art of Madhubani" /
+/// Punjabi craft storytelling sections directly from the database.
+model Craft {
+  id          String  @id @default(cuid(2))
+  slug        String  @unique
+  name        String // "Madhubani Hand-Painted"
+  /// "Mithila", "Awadh (Lucknow)", "Kashmir", "Punjab"
+  originRegion String?
+  shortLine   String? // one-line hook for cards
+  story       String? // long-form section copy
+  heroImage   String?
+  /// Drives ordering of the storytelling rail on the homepage.
+  position    Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@index([position])
+  @@map("craft")
+}
+
+/// The human who made the piece. This is a storytelling brand — provenance is
+/// the product.
+model Artisan {
+  id     String  @id @default(cuid(2))
+  slug   String  @unique
+  name   String
+  /// "Madhubani, Bihar" / "Patiala, Punjab"
+  region String?
+  bio    String?
+  photo  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@map("artisan")
+}
+
+/// Merchandising grouping: "Modern Madhubani Luxury", "Punjab Rooted",
+/// "Wedding Season". Many-to-many with products.
+model Collection {
+  id          String  @id @default(cuid(2))
+  slug        String  @unique
+  title       String
+  description String?
+  heroImage   String?
+  position    Int     @default(0)
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products ProductCollection[]
+
+  @@map("collection")
+}
+
+model ProductCollection {
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  /// Manual merchandising order within the collection.
+  position     Int        @default(0)
+
+  @@id([productId, collectionId])
+  @@index([collectionId, position])
+  @@map("product_collection")
+}
+// ============================================================================
+//  PRODUCTS
+// ============================================================================
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model Product {
+  id       String  @id @default(cuid(2))
+  slug     String  @unique
+  title    String
+  subtitle String?
+
+  category ProductCategory
+  status   ProductStatus   @default(DRAFT)
+
+  craftId String?
+  craft   Craft?  @relation(fields: [craftId], references: [id], onDelete: SetNull)
+
+  artisanId String?
+  artisan   Artisan? @relation(fields: [artisanId], references: [id], onDelete: SetNull)
+
+  // ---- Storytelling / provenance -------------------------------------------
+  description     String?
+  story           String?
+  techniqueNote   String?
+  provenance      String?
+  timeTakenLabel  String?
+  careInstructions String?
+  materials       String?
+  dimensions      String?
+
+  /// True for the hand-painted Madhubani narrative pieces: exactly one exists.
+  /// Drives "one of one" UI copy AND the stricter reservation path.
+  isOneOfAKind Boolean @default(true)
+
+  // ---- Logistics & tax ------------------------------------------------------
+  /// Needed to quote courier rates. Shawl ~250-400g, suit set ~600-900g.
+  weightGrams Int?
+  /// HSN code for the GST invoice. Shawls/stoles ~6214, suit sets ~6211/6204.
+  /// Stored per product because the rate depends on classification.
+  hsnCode String?
+
+  // ---- SEO ------------------------------------------------------------------
+  metaTitle       String?
+  metaDescription String?
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  images      ProductImage[]
+  variants    ProductVariant[]
+  collections ProductCollection[]
+
+  @@index([status, publishedAt])
+  @@index([category, status])
+  @@index([craftId])
+  @@index([artisanId])
+  @@map("product")
+}
+
+model ProductImage {
+  id String @id @default(cuid(2))
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  url String
+  /// Never optional in practice — enforce non-empty in the admin form. Screen
+  /// readers and the "wearable art" positioning both demand real alt text.
+  alt String?
+
+  width  Int?
+  height Int?
+  /// Tiny base64 LQIP for next/image placeholder="blur". Without this the
+  /// parallax gallery pops in and the scroll reveal looks broken.
+  blurDataUrl String?
+
+  position  Int     @default(0)
+  isPrimary Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([productId, position])
+  @@map("product_image")
+}
+
+/// EVERY product has at least one variant, including a shawl with no options.
+/// The degenerate case is a single row with label = null, which keeps stock,
+/// pricing and OrderItem on one code path. A suit set gets real rows
+/// ("Unstitched", "Stitched — M"). This is the anti-bloat choice: the
+/// alternative (nullable variantId + stock on Product) doubles every query.
+model ProductVariant {
+  id String @id @default(cuid(2))
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  /// NULL for the default/only variant.
+  label String?
+  /// Human SKU the owner writes on the parcel: "PS-MAD-001".
+  sku   String  @unique
+
+  // ---- Money: INR paise, always Int ----------------------------------------
+  /// e.g. 1_850_000 = Rs 18,500.00
+  priceInPaise Int
+  /// Strike-through "was" price. Nullable.
+  compareAtPriceInPaise Int?
+  currency              Currency @default(INR)
+
+  /// GST rate in BASIS POINTS (500 = 5%, 1800 = 18%).
+  ///
+  /// Under the 22-Sep-2025 GST 2.0 rationalisation, readymade apparel is
+  /// 5% at or below Rs 2,500 PER PIECE and 18% above it. Nearly every piece
+  /// in this catalogue is a Rs 10,000+ handmade textile, so 18% is the
+  /// realistic default -- hence 1800, not 500.
+  ///
+  /// Basis points (not a float, not a Decimal) because the rate is
+  /// threshold-dependent, has changed twice in recent memory, and integer
+  /// arithmetic is the only way to make paise round predictably.
+  /// Confirm the exact classification per HSN with a CA before going live.
+  gstRateBps Int @default(1800)
+
+  /// Physical units the owner actually holds. Decremented only on ALLOCATION
+  /// (payment captured / COD confirmed), never on add-to-cart.
+  /// A DB CHECK constraint (added in a raw migration) pins this >= 0 so that
+  /// no application bug can oversell.
+  quantityOnHand Int @default(1)
+
+  /// Lets the owner accept an order for a piece she will hand-make. Off by
+  /// default: the whole point of this catalogue is that stock is finite.
+  allowBackorder Boolean @default(false)
+
+  position Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reservations     StockReservation[]
+  cartItems        CartItem[]
+  orderItems       OrderItem[]
+  inventoryLedger  InventoryLedger[]
+
+  @@index([productId, position])
+  @@map("product_variant")
+}
+
+enum Currency {
+  INR
+  USD
+}
+// ============================================================================
+//  INVENTORY  —  the oversell guard
+//
+//  availableToSell(variant) =
+//        quantityOnHand
+//      - SUM(StockReservation.quantity WHERE status = ACTIVE AND expiresAt > now())
+//
+//  quantityOnHand is decremented ONLY when a reservation is CONSUMED (payment
+//  captured, or COD order confirmed). Adding to cart reserves nothing; entering
+//  checkout does.
+// ============================================================================
+
+enum ReservationStatus {
+  ACTIVE // holding stock, checkout in flight
+  CONSUMED // became a real allocated order line
+  RELEASED // user abandoned / payment failed, returned to the pool
+  EXPIRED // TTL elapsed, swept by cron
+}
+
+/// A short-lived hold placed the moment a customer enters checkout, so that a
+/// second customer cannot buy the same one-of-one shawl during the ~10 minutes
+/// a UPI collect request is pending on someone's phone.
+model StockReservation {
+  id String @id @default(cuid(2))
+
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  quantity Int @default(1)
+
+  /// Whose hold this is. Exactly one of these is set in practice.
+  cartId  String?
+  cart    Cart?   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  orderId String?
+  order   Order?  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  status    ReservationStatus @default(ACTIVE)
+  /// now() + 15 min at creation; refreshed while the customer is active on the
+  /// checkout page. A cron / Vercel scheduled function sweeps the stragglers.
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// The hot path: "how much of this variant is currently held?"
+  @@index([variantId, status, expiresAt])
+  @@index([cartId])
+  @@index([orderId])
+  @@index([status, expiresAt])
+  @@map("stock_reservation")
+}
+
+enum InventoryReason {
+  INITIAL_STOCK
+  ADMIN_ADJUSTMENT
+  ORDER_ALLOCATED
+  ORDER_CANCELLED
+  ORDER_RETURNED
+  DAMAGED_OR_LOST
+}
+
+/// Append-only stock movement log. For a store selling irreplaceable pieces,
+/// "where did that shawl go?" must always be answerable. Never UPDATE a row
+/// here; only INSERT.
+model InventoryLedger {
+  id String @id @default(cuid(2))
+
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  /// Signed: -1 when allocated to an order, +1 when a return is restocked.
+  delta          Int
+  /// quantityOnHand AFTER applying delta, captured for audit.
+  resultingOnHand Int
+
+  reason  InventoryReason
+  orderId String?
+  note    String?
+
+  /// NULL when the system did it; set when the owner adjusted stock by hand.
+  actorUserId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([variantId, createdAt])
+  @@index([orderId])
+  @@map("inventory_ledger")
+}
+// ============================================================================
+//  CART  —  server-authoritative, cookie-addressed
+//
+//  A guest gets a Cart row keyed by an httpOnly `cart_id` cookie. The browser
+//  store (Zustand) is an optimistic MIRROR for instant slide-out UI, never the
+//  source of truth: prices move, and a one-of-one piece can vanish between
+//  sessions. localStorage as source of truth would let a customer "hold" a
+//  shawl in their cart that was sold weeks ago.
+// ============================================================================
+
+model Cart {
+  id String @id @default(cuid(2))
+
+  /// NULL while the shopper is a guest; set on login/merge.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Opaque value stored in the httpOnly cookie. Separate from `id` so the
+  /// cookie value can be rotated on login without losing the row.
+  token String @unique
+
+  /// Marketing capture from the checkout form, before an account exists.
+  /// Also what powers abandoned-cart WhatsApp follow-up.
+  email String?
+  phone String?
+
+  /// Set when the cart converts, so the sweeper leaves it alone.
+  convertedOrderId String?  @unique
+  convertedAt      DateTime?
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items        CartItem[]
+  reservations StockReservation[]
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("cart")
+}
+
+model CartItem {
+  id String @id @default(cuid(2))
+
+  cartId String
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  quantity Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// One line per variant per cart. Makes the login-merge an upsert, and makes
+  /// "increment quantity" a single atomic UPDATE.
+  @@unique([cartId, variantId])
+  @@index([variantId])
+  @@map("cart_item")
+}
+// ============================================================================
+//  ORDERS
+//
+//  Three independent axes, deliberately NOT collapsed into one status column:
+//    OrderStatus       — the commercial lifecycle
+//    PaymentStatus     — money
+//    FulfillmentStatus — parcels
+//  A COD order is CONFIRMED + payment PENDING + fulfillment SHIPPED all at
+//  once; one enum could not express that.
+// ============================================================================
+
+enum OrderStatus {
+  PENDING // created, awaiting payment / confirmation
+  CONFIRMED // paid, or COD accepted
+  CANCELLED
+  COMPLETED // delivered and past the return window
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum FulfillmentStatus {
+  UNFULFILLED
+  PACKED
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  RTO // Return To Origin — the COD failure mode, common in India
+  RETURNED
+}
+
+enum PaymentProvider {
+  RAZORPAY // domestic India: UPI, cards, netbanking, wallets
+  STRIPE // reserved for international/NRI sales only — see notes
+  COD // no gateway; cash collected by the courier
+  MANUAL // owner took a direct UPI transfer over WhatsApp
+}
+
+enum PaymentMethod {
+  UPI
+  CARD
+  NETBANKING
+  WALLET
+  EMI
+  COD
+  BANK_TRANSFER
+}
+
+/// Determines CGST+SGST vs IGST on the invoice.
+enum SupplyType {
+  INTRA_STATE // ship-to state == Punjab (seller's state)
+  INTER_STATE // everywhere else in India
+  EXPORT // outside India; zero-rated
+}
+
+model Order {
+  id String @id @default(cuid(2))
+
+  /// Human-facing, sequential-ish, spoken aloud on WhatsApp: "PS-2026-0042".
+  /// Generated from a Postgres sequence, NOT from the cuid.
+  orderNumber String @unique
+
+  /// NULL for guest checkout. Guest checkout is the default path: forcing an
+  /// account on a 5-SKU Instagram store kills conversion.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  /// Always captured, account or not.
+  email String
+  phone String
+
+  status       OrderStatus       @default(PENDING)
+  paymentStatus PaymentStatus    @default(PENDING)
+  fulfillmentStatus FulfillmentStatus @default(UNFULFILLED)
+
+  // ---- Money (all INR paise) ------------------------------------------------
+  currency          Currency @default(INR)
+  /// Sum of line totals, GST-exclusive.
+  subtotalInPaise   Int
+  discountInPaise   Int      @default(0)
+  shippingInPaise   Int      @default(0)
+  /// COD handling fee, if the owner charges one to offset RTO risk.
+  codFeeInPaise     Int      @default(0)
+  /// Total GST = cgst + sgst + igst.
+  taxInPaise        Int      @default(0)
+  cgstInPaise       Int      @default(0)
+  sgstInPaise       Int      @default(0)
+  igstInPaise       Int      @default(0)
+  totalInPaise      Int
+
+  // ---- Tax context, snapshotted --------------------------------------------
+  supplyType SupplyType @default(INTRA_STATE)
+  /// The seller's GSTIN at time of sale. NULL while turnover is below the
+  /// registration threshold and no tax is charged.
+  sellerGstin String?
+  /// B2B: customer supplied their own GSTIN to claim input credit.
+  buyerGstin  String?
+  /// Sequential tax-invoice number, distinct from orderNumber. Only issued
+  /// once the order is actually paid/confirmed, per GST rules.
+  invoiceNumber String? @unique
+  invoicedAt    DateTime?
+
+  couponId String?
+  coupon   Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
+
+  /// Gift note / "please deliver after 6pm" etc.
+  customerNote String?
+  /// Owner-only scratchpad, never shown to the customer.
+  internalNote String?
+
+  placedAt    DateTime  @default(now())
+  confirmedAt DateTime?
+  cancelledAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  items           OrderItem[]
+  shippingAddress OrderAddress?
+  payments        Payment[]
+  shipments       Shipment[]
+  reservations    StockReservation[]
+
+  @@index([userId])
+  @@index([status, placedAt])
+  @@index([paymentStatus])
+  @@index([fulfillmentStatus])
+  @@index([email])
+  @@index([phone])
+  @@index([placedAt])
+  @@map("order")
+}
+
+/// A frozen COPY of the delivery address. Deliberately not a foreign key to
+/// Address: if the customer later edits their saved address, the historical
+/// invoice and the courier manifest must not silently change.
+model OrderAddress {
+  id String @id @default(cuid(2))
+
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  fullName String
+  phone    String
+  /// Some couriers will try a second number before marking RTO.
+  altPhone String?
+
+  line1    String
+  line2    String?
+  landmark String?
+  city     String
+  state    IndianState
+  pinCode  String
+  country  String      @default("IN")
+
+  createdAt DateTime @default(now())
+
+  @@index([pinCode])
+  @@map("order_address")
+}
+
+/// Every commercially meaningful field is SNAPSHOTTED. The product may later be
+/// renamed, repriced, re-photographed or archived; this row must not move.
+model OrderItem {
+  id String @id @default(cuid(2))
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  /// SetNull, not Cascade: deleting a product must never delete order history.
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  // ---- snapshot ------------------------------------------------------------
+  productTitle String
+  variantLabel String?
+  sku          String
+  imageUrl     String?
+  craftName    String?
+  hsnCode      String?
+
+  quantity          Int
+  unitPriceInPaise  Int
+  /// unitPriceInPaise * quantity, GST-exclusive, after line discount.
+  lineTotalInPaise  Int
+  discountInPaise   Int @default(0)
+
+  /// The rate that ACTUALLY applied, in basis points. Frozen at purchase
+  /// time: the Rs 2,500 apparel slab boundary means a price edit alone can
+  /// flip a product between 5% and 18%, and a reprinted invoice must never
+  /// disagree with the one the customer already has.
+  gstRateBps  Int @default(1800)
+  cgstInPaise Int @default(0)
+  sgstInPaise Int @default(0)
+  igstInPaise Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([variantId])
+  @@map("order_item")
+}
+
+// ============================================================================
+//  PAYMENTS
+// ============================================================================
+
+/// Provider-agnostic on purpose. Razorpay serves domestic India; the same table
+/// can later hold a Stripe row for an NRI buying in USD.
+model Payment {
+  id String @id @default(cuid(2))
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  provider PaymentProvider
+  method   PaymentMethod?
+
+  /// razorpay_order_id / Stripe PaymentIntent id
+  providerOrderId   String?
+  /// razorpay_payment_id / Stripe Charge id
+  providerPaymentId String? @unique
+  /// razorpay_signature, kept for dispute evidence
+  providerSignature String?
+
+  amountInPaise Int
+  currency      Currency @default(INR)
+  status        PaymentStatus @default(PENDING)
+
+  refundedInPaise Int @default(0)
+
+  /// Gateway error surface, for the owner to read in /admin.
+  errorCode        String?
+  errorDescription String?
+
+  /// Raw gateway payload. Invaluable when reconciling a disputed UPI payment.
+  rawPayload Json?
+
+  authorizedAt DateTime?
+  capturedAt   DateTime?
+  failedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([providerOrderId])
+  @@index([status])
+  @@map("payment")
+}
+
+/// Gateway webhooks arrive more than once and out of order. This table is the
+/// idempotency guard: insert the provider's event id under a unique constraint
+/// FIRST; a conflict means "already handled, ack and return 200".
+model WebhookEvent {
+  id String @id @default(cuid(2))
+
+  provider PaymentProvider
+  /// x-razorpay-event-id header / Stripe event id
+  eventId  String
+  eventType String
+
+  payload Json
+
+  processedAt DateTime?
+  /// Set when handling threw; lets the owner see stuck events in /admin.
+  error       String?
+  attempts    Int     @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@unique([provider, eventId])
+  @@index([processedAt])
+  @@map("webhook_event")
+}
+
+// ============================================================================
+//  SHIPPING
+// ============================================================================
+
+model Shipment {
+  id String @id @default(cuid(2))
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  /// "Delhivery", "Bluedart", "India Post", "Shiprocket"
+  courier     String?
+  /// Air waybill / tracking number.
+  awb         String?
+  trackingUrl String?
+
+  status FulfillmentStatus @default(PACKED)
+
+  shippedAt   DateTime?
+  deliveredAt DateTime?
+
+  /// COD remittance tracking: did the courier actually pay the owner back?
+  codAmountInPaise  Int?
+  codRemitted       Boolean @default(false)
+  codRemittedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([awb])
+  @@map("shipment")
+}
+
+// ============================================================================
+//  PROMOTIONS
+// ============================================================================
+
+enum CouponType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_SHIPPING
+}
+
+/// Instagram stores run promo codes constantly ("DIWALI10"). Kept deliberately
+/// simple: no stacking, no per-product rules until the shop needs them.
+model Coupon {
+  id   String     @id @default(cuid(2))
+  code String     @unique
+  type CouponType
+
+  /// Basis points for PERCENTAGE (1000 = 10%), paise for FIXED_AMOUNT.
+  value Int
+
+  minSubtotalInPaise Int?
+  maxDiscountInPaise Int?
+
+  usageLimit     Int?
+  usageCount     Int  @default(0)
+  perUserLimit   Int?
+
+  startsAt DateTime?
+  endsAt   DateTime?
+  isActive Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+
+  @@index([isActive, endsAt])
+  @@map("coupon")
+}
