@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { PRODUCTS, CRAFTS, formatINR, getProduct, BRAND } from "@/lib/catalog";
 import { AddToBag } from "@/components/commerce/add-to-bag";
+import { PieceGallery } from "@/components/ecommerce/PieceGallery";
+import { StickyBuy, EnquirePrivately } from "@/components/ecommerce/StickyBuy";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 
@@ -56,48 +58,12 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
         </nav>
 
         <div className="grid gap-[clamp(2rem,4vw,5rem)] pb-24 lg:grid-cols-[1.15fr_1fr]">
-          {/* ---------- the cloth ---------- */}
-          <div className="space-y-4">
-            <div
-              className="relative aspect-4/5 overflow-hidden"
-              style={{ border: "1px solid rgba(26,26,26,0.14)" }}
-            >
-              <Image
-                src={p.image}
-                alt={`${p.name}, ${craft.label}`}
-                fill
-                quality={90}
-                sizes="(max-width: 1024px) 94vw, 56vw"
-                priority
-                /* cropped into the weave — the source frames include a
-                   mannequin, a vase and a patterned carpet */
-                className="object-cover"
-                style={{ transform: "scale(1.6)", objectPosition: "40% 55%" }}
-              />
-            </div>
-            <div
-              className="relative aspect-4/5 overflow-hidden"
-              style={{ border: "1px solid rgba(26,26,26,0.14)" }}
-            >
-              <Image
-                src={p.image}
-                alt={`${p.name}, detail`}
-                fill
-                quality={90}
-                sizes="(max-width: 1024px) 94vw, 56vw"
-                loading="lazy"
-                className="object-cover"
-                style={{ transform: "scale(2.4)", objectPosition: "62% 38%" }}
-              />
-            </div>
-            <p
-              className="t-body-ed"
-              style={{ color: "#6B645A", fontSize: "0.875rem" }}
-            >
-              Photographed as it arrived. What you see is the actual piece, not
-              a sample of the design.
-            </p>
-          </div>
+          {/* ---------- the cloth ----------
+              Was two copies of the SAME photograph at scale(1.6) and
+              scale(2.4) with shifted object-positions, faking a second view.
+              A reasonable hack with one photograph per piece; a
+              misrepresentation the moment there are six real frames. */}
+          <PieceGallery product={p} />
 
           {/* ---------- the rail ---------- */}
           <div className="lg:sticky lg:top-28 lg:h-fit lg:pb-16">
@@ -131,34 +97,53 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
               )}
             </h1>
 
+            {/* item 57 — at these values the price is the second most
+                important thing on the page, and 1.25rem of UI type beside a
+                4rem display name reads as a receipt line. */}
             <p
-              className="mt-6"
+              className="mt-7"
               style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "1.25rem",
-                letterSpacing: "0.02em",
+                fontFamily: "var(--font-display)",
+                fontWeight: 300,
+                fontSize: "clamp(1.75rem, 2.6vw, 2.4rem)",
+                letterSpacing: "-0.025em",
+                lineHeight: 1,
                 color: "#1A1A1A",
               }}
             >
               {formatINR(p.pricePaise)}
             </p>
 
-            {p.stock === 1 ? (
+            {/* item 58 — availability as a STATE, with a mark beside it.
+                A line of grey micro-type under a price is read as a caption
+                and skipped; this is the single fact that decides whether
+                someone can still have the thing. */}
+            <div className="mt-4 flex items-center gap-3" data-availability>
+              <span
+                aria-hidden
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: p.stock > 0 ? "#8A2F3B" : "#6B645A",
+                  flexShrink: 0,
+                }}
+              />
               <p
-                className="t-micro-ed mt-3"
-                style={{ color: "#8A2F3B", letterSpacing: "var(--tracking-luxe)" }}
+                className="t-micro-ed"
+                style={{
+                  color: p.stock === 1 ? "#8A2F3B" : "#6B645A",
+                  letterSpacing: "var(--tracking-luxe)",
+                  margin: 0,
+                }}
               >
-                One exists — these are not restocked
+                {p.stock === 1
+                  ? "One exists — these are not restocked"
+                  : p.stock > 1
+                    ? `${p.stock} available`
+                    : "Sold"}
               </p>
-            ) : p.stock > 1 ? (
-              <p className="t-micro-ed mt-3" style={{ color: "#6B645A", letterSpacing: "var(--tracking-luxe)" }}>
-                {p.stock} available
-              </p>
-            ) : (
-              <p className="t-micro-ed mt-3" style={{ color: "#6B645A", letterSpacing: "var(--tracking-luxe)" }}>
-                Sold
-              </p>
-            )}
+            </div>
 
             <p
               className="t-body-ed mt-7 max-w-[42ch]"
@@ -167,7 +152,11 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
               {p.blurb}
             </p>
 
-            <AddToBag slug={p.slug} stock={p.stock} className="mt-9" />
+            <div id="buy">
+              <AddToBag slug={p.slug} stock={p.stock} className="mt-9" />
+            </div>
+
+            <EnquirePrivately product={p} />
 
             {/* technique taught at the point of decision — the scan found
                 nobody in the category does this */}
@@ -277,6 +266,9 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
       </section>
 
       <SiteFooter />
+
+      {/* the bar only appears once the real button has scrolled away */}
+      <StickyBuy product={p} watch="buy" />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 
 /**
  * FAIL-VISIBLE SCROLL REVEAL.
@@ -56,4 +57,44 @@ export function useReveal<T extends Element>(amount = 0.3) {
   }, [amount]);
 
   return [ref, shown] as const;
+}
+
+/**
+ * The component form, for lists — where a hook per item is not possible.
+ *
+ * This exists because I have now reached for `whileInView` out of habit three
+ * times AFTER writing the hook above, each time in a list. Having the safe
+ * version be as easy to type as the unsafe one is the only thing that actually
+ * prevents it.
+ */
+export function RevealIn({
+  children,
+  amount = 0.15,
+  delay = 0,
+  y = 24,
+  className,
+  style,
+}: {
+  children: React.ReactNode;
+  amount?: number;
+  delay?: number;
+  y?: number;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  const reduced = useReducedMotion();
+  const [ref, shown] = useReveal<HTMLDivElement>(amount);
+
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      style={style}
+      initial={reduced ? false : { opacity: 0, y }}
+      animate={shown || reduced ? { opacity: 1, y: 0 } : undefined}
+      transition={{ type: "spring", stiffness: 90, damping: 24, mass: 0.9, delay }}
+    >
+      {children}
+    </motion.div>
+  );
 }
