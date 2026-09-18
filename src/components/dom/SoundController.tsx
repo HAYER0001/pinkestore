@@ -116,7 +116,7 @@ export function SoundController() {
       disabled={disabled}
       aria-pressed={on}
       aria-label={`Ambient sound ${on ? "on" : "off"}`}
-      className="pointer-events-auto t-micro-ed"
+      className="pointer-events-auto t-micro-ed whitespace-nowrap"
       style={{
         color: "var(--chrome-ink, #FFFFFF)",
         letterSpacing: "var(--tracking-luxe)",

@@ -105,12 +105,14 @@ export function Overlay() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-7">
+        {/* nowrap + a tighter gap on phones: at 390px the wide luxe tracking
+            pushed "Sound [off]" onto two lines mid-label. */}
+        <div className="flex items-center gap-4 md:gap-7">
         <SoundController />
         <Magnet range={90}>
         <button
           type="button"
-          className="pointer-events-auto t-micro-ed"
+          className="pointer-events-auto t-micro-ed whitespace-nowrap"
           style={{
             color: "var(--chrome-ink, #FFFFFF)",
             letterSpacing: "var(--tracking-luxe)",

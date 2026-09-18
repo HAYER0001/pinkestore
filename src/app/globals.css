@@ -654,3 +654,99 @@
   .shot-crop { transform: scale(1.65); object-position: 40% 56%; }
   .shot-crop-macro { transform: scale(2.4); object-position: 62% 38%; }
 }
+
+/* ============================================================================
+   PHASE 2 — THE TYPE SCALE
+   Named steps, not arbitrary clamps scattered through components. Every
+   heading on the site resolves to one of these.
+
+   MOBILE RAMP: the minimums are deliberately high. The usual failure is a
+   clamp whose lower bound was chosen so the desktop composition survives a
+   390px screen — which produces 28px "hero" type that reads as a subheading.
+   Phone type here is LARGER relative to its viewport than desktop type is,
+   because a phone is held closer and shows less at once.
+   ========================================================================= */
+
+@theme {
+  --text-colossal: clamp(3.75rem, 15vw, 12rem);   /* one word, compositional */
+  --text-hero-2: clamp(2.75rem, 8vw, 8rem);
+  --text-display-2: clamp(2.25rem, 5.2vw, 4.75rem);
+  --text-quote: clamp(1.75rem, 4.2vw, 3.5rem);    /* pull quotes */
+  --text-title-2: clamp(1.5rem, 2.8vw, 2.5rem);
+  --text-lede: clamp(1.125rem, 1.6vw, 1.5rem);    /* standfirst */
+  --text-read: clamp(1rem, 1.15vw, 1.125rem);     /* body */
+  --text-caption: 0.8125rem;
+  --text-mono: 0.6875rem;
+}
+
+@layer utilities {
+  /* Tracking tightens as size grows. A display face set at 12rem with 0
+     tracking visibly falls apart; the same face at 1rem needs none. */
+  .ty-colossal {
+    font-family: var(--font-display);
+    font-size: var(--text-colossal);
+    font-weight: 300;
+    line-height: 0.82;
+    letter-spacing: -0.05em;
+  }
+  .ty-hero {
+    font-family: var(--font-display);
+    font-size: var(--text-hero-2);
+    font-weight: 300;
+    line-height: 0.9;
+    letter-spacing: -0.042em;
+  }
+  .ty-display {
+    font-family: var(--font-display);
+    font-size: var(--text-display-2);
+    font-weight: 300;
+    line-height: 0.96;
+    letter-spacing: -0.034em;
+  }
+  .ty-quote {
+    font-family: var(--font-display);
+    font-size: var(--text-quote);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.16;
+    letter-spacing: -0.024em;
+  }
+  .ty-title {
+    font-family: var(--font-display);
+    font-size: var(--text-title-2);
+    font-weight: 300;
+    line-height: 1.08;
+    letter-spacing: -0.022em;
+  }
+  .ty-lede {
+    font-family: var(--font-body);
+    font-size: var(--text-lede);
+    font-weight: 300;
+    line-height: 1.58;
+    letter-spacing: 0.005em;
+  }
+  .ty-read {
+    font-family: var(--font-body);
+    font-size: var(--text-read);
+    font-weight: 300;
+    line-height: 1.75;
+  }
+  .ty-caption {
+    font-family: var(--font-body);
+    font-size: var(--text-caption);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+  .ty-mono {
+    font-family: var(--font-body);
+    font-size: var(--text-mono);
+    font-weight: 400;
+    letter-spacing: var(--tracking-luxe-wide);
+    text-transform: uppercase;
+  }
+
+  /* Measure caps. Prose past ~68 characters loses the reader between lines. */
+  .measure-tight { max-width: 34ch; }
+  .measure-read { max-width: 62ch; }
+  .measure-lede { max-width: 46ch; }
+}

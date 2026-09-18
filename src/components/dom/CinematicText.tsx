@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
+import { useReveal } from "@/components/type/useReveal";
 /* A bare ElementType is too wide for TS to resolve the children prop — it
    collapses to `never`. A narrow union of the tags we actually use keeps it
    type-safe without a cast. */
@@ -27,7 +28,9 @@ export function CinematicText({
   style,
   delay = 0,
   stagger = 0.055,
-  once = true,
+  /* Reveals are one-way now: useReveal disconnects on first fire and never
+     re-hides. Re-hiding text the reader has already read is not a thing this
+     site should ever do, so there is no `once={false}` to offer. */
   /* 0.4 meant a headline sitting low in a short viewport never crossed the
      threshold and stayed hidden forever. 0.15 fires as soon as the first line
      is genuinely on screen. */
@@ -39,11 +42,16 @@ export function CinematicText({
   style?: React.CSSProperties;
   delay?: number;
   stagger?: number;
-  once?: boolean;
   amount?: number;
 }) {
   const reduced = useReducedMotion();
   const words = text.split(" ");
+  /* One observer on the unclipped wrapper. Watching the moving spans instead
+     is a deadlock (they start outside their own mask, so they report 0%
+     visible and never get the callback that would bring them back), and
+     whileInView alone leaves the text hidden forever for anyone who arrives
+     already scrolled past it. See useReveal. */
+  const [ref, shown] = useReveal<HTMLSpanElement>(amount);
 
   if (reduced) {
     return <Tag className={className} style={style}>{text}</Tag>;
@@ -52,9 +60,13 @@ export function CinematicText({
   return (
     <Tag className={className} style={style}>
       <span className="sr-only">{text}</span>
-      <span aria-hidden="true">
+      <motion.span
+        ref={ref}
+        aria-hidden="true"
+        animate={shown ? "shown" : "hidden"}
+      >
         {words.map((word, i) => (
-          <span
+          <motion.span
             key={`${word}-${i}`}
             style={{
               display: "inline-block",
@@ -70,15 +82,16 @@ export function CinematicText({
             <motion.span
               style={{ display: "inline-block", willChange: "transform" }}
               initial={{ y: "115%" }}
-              whileInView={{ y: "0%" }}
-              viewport={{ once, amount }}
-              transition={{ ...HEAVY, delay: delay + i * stagger }}
+              variants={{
+                hidden: { y: "115%" },
+                shown: { y: "0%", transition: { ...HEAVY, delay: delay + i * stagger } },
+              }}
             >
               {word}
             </motion.span>
-          </span>
+          </motion.span>
         ))}
-      </span>
+      </motion.span>
     </Tag>
   );
 }
