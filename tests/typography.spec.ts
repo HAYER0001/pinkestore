@@ -147,22 +147,26 @@ test.describe("chapter numerals as navigation", () => {
 
     const rail = page.locator('nav[aria-label="Chapters"]');
     await expect(rail).toBeVisible();
-    await expect(rail.locator("li")).toHaveCount(4);
+    await expect(rail.locator("li")).toHaveCount(5);
 
     /* every numeral must resolve to a section that actually exists */
     const missing = await page.evaluate(() =>
-      ["origin", "scrub-track", "pieces", "craft"].filter((id) => !document.getElementById(id)),
+      ["origin", "scrub-track", "craft", "pieces", "promise"].filter(
+        (id) => !document.getElementById(id),
+      ),
     );
     expect(missing).toEqual([]);
 
     await expect(rail.locator('[aria-current="true"]')).toHaveCount(1);
 
+    /* Phase 7 reordered the spine: The Making moved ahead of the shop, so
+       craft is chapter 03 and the shop is 04. */
     const y = await page.evaluate(
       () => document.getElementById("craft")!.getBoundingClientRect().top + window.scrollY,
     );
     await lenisTo(page, y);
     await settle(page, 1200);
-    await expect(rail.locator('[aria-current="true"]')).toContainText("04");
+    await expect(rail.locator('[aria-current="true"]')).toContainText("03");
   });
 
   test("the rail never prints through the hero", async ({ page }) => {

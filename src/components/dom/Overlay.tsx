@@ -117,22 +117,21 @@ export function Overlay() {
       </header>
 
       {/* ---------------- bottom ----------------
-          A div, NOT a <footer>. This is decorative cinematic furniture — two
-          labels and a scroll prompt. Marking it up as a footer gave the
+          A div, NOT a <footer>. This is decorative cinematic furniture — a
+          scroll prompt. Marking it up as a footer gave the
           homepage two contentinfo landmarks once the real site footer landed,
           and left a screen-reader user choosing between them. */}
-      <div className="flex items-end justify-between">
-        <span
-          className="t-micro-ed hidden md:block"
-          style={{
-            color: "var(--chrome-ink, #FFFFFF)",
-            opacity: intro ? 0.55 : 0,
-            letterSpacing: "var(--tracking-luxe)",
-            mixBlendMode: "var(--chrome-blend, difference)" as React.CSSProperties["mixBlendMode"],
-          }}
-        >
-          One of one
-        </span>
+      <div className="flex items-end justify-center">
+        {/* FEWER SIMULTANEOUS ELEMENTS (item 89).
+            Two corner labels used to sit here: "One of one", which the utility
+            bar already says on every page, and "Est. Mithila" — which reads as
+            "established in Mithila" and is simply wrong. The shop is in
+            Chandigarh; Mithila is where one of the five crafts comes from.
+            That is the same provenance slip this project has been corrected on
+            before, printed in the corner of the first screen. Both are gone:
+            the hero already carries a monogram, a nav, a chapter rail, a
+            progress hairline, a headline, a standfirst, two CTAs, a piece and
+            a scroll cue. It did not need two more labels. */}
 
         <div
           data-scroll-cue
@@ -146,17 +145,6 @@ export function Overlay() {
           <ScrollIndicator />
         </div>
 
-        <span
-          className="t-micro-ed hidden md:block"
-          style={{
-            color: "var(--chrome-ink, #FFFFFF)",
-            opacity: intro ? 0.55 : 0,
-            letterSpacing: "var(--tracking-luxe)",
-            mixBlendMode: "var(--chrome-blend, difference)" as React.CSSProperties["mixBlendMode"],
-          }}
-        >
-          Est. Mithila
-        </span>
       </div>
     </div>
   );

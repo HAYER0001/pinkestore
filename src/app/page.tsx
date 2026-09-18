@@ -33,8 +33,9 @@ import { HeroDepth, HeroReveal } from "@/components/site/HeroDepth";
 const CHAPTERS = [
   { id: "origin", label: "Origin" },
   { id: "scrub-track", label: "The Cloth" },
+  { id: "craft", label: "The Making" },
   { id: "pieces", label: "The Pieces" },
-  { id: "craft", label: "The Craft" },
+  { id: "promise", label: "The Promise" },
 ];
 
 export default function Home() {
@@ -125,19 +126,12 @@ export default function Home() {
         {/* ---------- the portal: camera pushes through the fabric ---------- */}
         <PortalTransition />
 
-        {/* ---------- the shop: WebGL hands off here ---------- */}
-        <ProductGallery />
-
-        {/* A pull quote has to be a CLAIM, not a summary of what surrounds it.
-            No attribution: we have not interviewed anyone, and inventing a
-            maker to put under a sentence is the same lie as inventing the
-            provenance. */}
-        <PullQuote ground="#F3EFE8" tone="#1A1A1A" threadTone="#96605B">
-          One of one is not a scarcity tactic. It is simply what happens when
-          the only tool is a hand.
-        </PullQuote>
-
-        {/* ---------- editorial close ---------- */}
+        {/* ---------- 03 · the making ----------
+            This used to sit AFTER the shop. A story-led site that sells before
+            it explains has the spine backwards: you arrive at a price with no
+            reason for it yet. It has to be on this side of the portal though —
+            it is a cream section, and the portal is the dark-to-light
+            handoff. */}
         <section
           id="craft"
           className="flex min-h-screen items-center justify-center px-[clamp(1.25rem,5vw,6rem)] py-32"
@@ -148,7 +142,7 @@ export default function Home() {
               className="ty-mono"
               style={{ color: "#8A6812", letterSpacing: "var(--tracking-luxe-widest)" }}
             >
-              The Craft
+              The Making
             </p>
 
             <div className="mt-[clamp(2rem,4vw,3rem)]">
@@ -172,7 +166,69 @@ export default function Home() {
                 stagger={0.018}
               />
             </div>
+
+            <CtaPair
+              className="mt-[clamp(2.5rem,5vh,3.5rem)] justify-center"
+              tone="#1A1A1A"
+              ground="#FAF8F5"
+              primary={{ href: "/craft", label: "All five techniques" }}
+              secondary={{ href: "/collection", label: "See what is in stock" }}
+            />
           </VelocityDistort>
+        </section>
+
+        {/* ---------- 04 · the pieces ---------- */}
+        <ProductGallery />
+
+        {/* ---------- 05 · the promise ----------
+            A pull quote has to be a CLAIM, not a summary of what surrounds it.
+            No attribution: we have not interviewed anyone, and inventing a
+            maker to put under a sentence is the same lie as inventing the
+            provenance. */}
+        <div id="promise" className="scroll-mt-24">
+          <PullQuote ground="#F3EFE8" tone="#1A1A1A" threadTone="#96605B">
+            One of one is not a scarcity tactic. It is simply what happens when
+            the only tool is a hand.
+          </PullQuote>
+        </div>
+
+        {/* ---------- the closing statement (item 40) ----------
+            The last thing anyone reads has to earn the scroll that got them
+            here, and it has to be TRUE. Not a slogan, not a promise we cannot
+            keep — the actual reason this shop is different from a shop that
+            reorders. */}
+        <section
+          className="flex min-h-[85vh] items-center justify-center px-[clamp(1.25rem,5vw,6rem)] py-[clamp(4rem,12vh,9rem)]"
+          style={{ background: "#1A1A1A" }}
+        >
+          {/* An explicit width, not a ch measure: `ch` resolves against the
+              INHERITED font size, so 46ch here was ~368px of body text while
+              the headline inside it is set at 76px. It wrapped to four lines. */}
+          <div className="max-w-[860px] text-center">
+            <DisplayComposition
+              align="center"
+              lines={[
+                { text: "What you are buying", scale: "display" },
+                { text: "is someone's winter", scale: "display", italic: true },
+              ]}
+              style={{ color: "#FAF8F5" }}
+            />
+
+            <Standfirst className="mx-auto mt-[clamp(2rem,4vh,3rem)]" tone="#C9A59F">
+              Months of one person's hands, and the fact that they will never
+              spend them the same way twice. When a piece is finished they begin
+              something else, and it is different. That is the whole business.
+            </Standfirst>
+
+            <div className="mt-[clamp(2.5rem,5vh,3.5rem)] flex justify-center">
+              <CtaPair
+                tone="#FAF8F5"
+                ground="#1A1A1A"
+                primary={{ href: "/collection", label: "See the collection" }}
+                secondary={{ href: "/about", label: "About the shop" }}
+              />
+            </div>
+          </div>
         </section>
       </main>
 
