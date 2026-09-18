@@ -585,3 +585,72 @@
     grid-auto-rows: clamp(200px, 30vh, 280px) !important;
   }
 }
+
+/* ============================================================================
+   PHASE 1 — THE BRAND SYSTEM
+   Six colours and nothing else. Every surface on this site resolves to one of
+   them; anything that does not is an exception that has to be argued for.
+   ========================================================================= */
+
+@theme {
+  /* --- grounds --- */
+  --color-brand-ivory: #FAF8F5;      /* the page */
+  --color-brand-paper: #F3EFE8;      /* the alternating band */
+  --color-brand-charcoal: #1A1A1A;   /* ink, and the dark ground */
+  --color-brand-indigo: #2A3470;     /* the cinematic ground, from the jamawar */
+
+  /* --- rose ---
+     Three values, not one. A single hex cannot be both a surface tint and
+     legible text on two different grounds: #C9A59F is 2.12:1 on ivory, which
+     fails as text, while #96605B is 4.81:1 and passes. Use them by ROLE. */
+  --color-brand-rose: #C9A59F;       /* surface tint + text on charcoal, 7.76:1 */
+  --color-brand-rose-ink: #96605B;   /* text on ivory, 4.81:1 */
+  --color-brand-rose-deep: #8A2F3B;  /* the madder in the cloth — accents only */
+
+  /* --- the one metal --- */
+  --color-brand-gold: #E8BC57;       /* 6.45:1 on indigo, 9.75:1 on charcoal */
+  --color-brand-gold-ink: #8A6812;   /* gold that survives on ivory, 4.6:1 */
+}
+
+:root {
+  /* --- spacing: 4px base, no exceptions --- */
+  --b-1: 4px;
+  --b-2: 8px;
+  --b-3: 12px;
+  --b-4: 16px;
+  --b-6: 24px;
+  --b-8: 32px;
+  --b-12: 48px;
+  --b-16: 64px;
+  --b-24: 96px;
+
+  /* --- the hairline. One weight, one opacity, everywhere. --- */
+  --b-rule: 1px solid rgba(26, 26, 26, 0.14);
+  --b-rule-dark: 1px solid rgba(250, 248, 245, 0.16);
+
+  /* ==========================================================================
+     MOTION LANGUAGE
+     Four springs and one curve. Every animated thing on the site uses one of
+     these; a new spring has to justify why none of them fit.
+     ======================================================================== */
+
+  /* SETTLE — things arriving. Slow, heavy, no overshoot to speak of. */
+  --m-settle: 70, 20, 1.5;        /* stiffness, damping, mass */
+  /* GLIDE — drawers, the push-back. Weighty with a perceptible landing. */
+  --m-glide: 100, 18, 1;
+  /* SNAP — magnetic returns, quantity taps. Rigid, immediate. */
+  --m-snap: 400, 25, 0.4;
+  /* TRACK — anything following the pointer. Light enough to keep up. */
+  --m-track: 150, 20, 0.5;
+
+  /* the one non-spring curve, for scrubbed and time-based fades */
+  --m-ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@layer utilities {
+  /* photography treatment: one crop discipline, applied everywhere.
+     Source frames contain a mannequin, a vase and a patterned carpet, so every
+     product image is scaled into the cloth rather than shown whole. */
+  .shot-crop { transform: scale(1.65); object-position: 40% 56%; }
+  .shot-crop-macro { transform: scale(2.4); object-position: 62% 38%; }
+}

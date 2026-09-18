@@ -9,6 +9,7 @@ import { canvasStore } from "@/utils/animations/canvas-store";
 import { SoundController } from "./SoundController";
 import { Magnet } from "./Magnet";
 import { useCursor } from "./CursorContext";
+import { Wordmark } from "@/components/brand/Monogram";
 import { usePathname } from "next/navigation";
 import { useCartStore, selectCartCount } from "@/store/useCartStore";
 
@@ -75,25 +76,10 @@ export function Overlay() {
         <Link
           href="/"
           className="pointer-events-auto"
+          aria-label="The Pinkestore — home"
           style={{ mixBlendMode: "var(--chrome-blend, difference)" as React.CSSProperties["mixBlendMode"] }}
         >
-          <span
-            className="t-micro-ed block"
-            style={{ color: "var(--chrome-ink, #FFFFFF)", letterSpacing: "var(--tracking-luxe-widest)" }}
-          >
-            The Pinkestore
-          </span>
-          <span
-            className="t-micro-ed block"
-            style={{
-              color: "var(--chrome-ink, #FFFFFF)",
-              opacity: 0.55,
-              letterSpacing: "var(--tracking-luxe)",
-              marginTop: "0.45rem",
-            }}
-          >
-            Chandigarh
-          </span>
+          <Wordmark tone="var(--chrome-ink, #FFFFFF)" />
         </Link>
 
         <nav

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCartStore, selectCartCount } from "@/store/useCartStore";
-import { BRAND } from "@/lib/catalog";
+import { Wordmark } from "@/components/brand/Monogram";
 
 /**
  * Header for the commerce routes. The homepage has fixed cinematic chrome that
@@ -19,19 +19,8 @@ export function CommerceHeader() {
       style={{ background: "rgba(250,248,245,0.92)", backdropFilter: "blur(8px)" }}
     >
       <div className="mx-auto flex max-w-[1500px] items-center justify-between px-[clamp(1rem,3vw,3rem)] py-5">
-        <Link href="/" className="block">
-          <span
-            className="t-micro-ed block"
-            style={{ color: "#1A1A1A", letterSpacing: "var(--tracking-luxe-widest)" }}
-          >
-            {BRAND.name}
-          </span>
-          <span
-            className="t-micro-ed mt-1 block"
-            style={{ color: "#6B645A", letterSpacing: "var(--tracking-luxe)" }}
-          >
-            {BRAND.city}
-          </span>
+        <Link href="/" className="block" aria-label="The Pinkestore — home">
+          <Wordmark tone="#1A1A1A" />
         </Link>
 
         <nav className="flex items-center gap-8">
