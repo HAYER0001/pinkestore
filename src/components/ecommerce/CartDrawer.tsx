@@ -250,15 +250,19 @@ export function CartDrawer() {
                   {/* rolls like an odometer when a quantity changes */}
                   <RollingINR
                     paise={total}
-                    className="font-[family-name:var(--font-body)] text-[1.35rem] text-[#1A1A1A]"
+                    className="font-[family-name:var(--font-display)] text-[1.7rem] font-light tracking-[-0.025em] text-[#1A1A1A]"
                   />
                 </div>
 
+                {/* Was "Shipping calculated at checkout". Checkout does no
+                    such thing — it hands you to a person, and /shipping states
+                    that no rate has been decided. Three surfaces, one of which
+                    was asserting a calculation that does not exist. */}
                 <p
                   className="t-micro-ed mt-2"
                   style={{ color: "#6B645A", letterSpacing: "var(--tracking-luxe)" }}
                 >
-                  Shipping calculated at checkout
+                  Sending agreed with you before anything moves
                 </p>
 
                 <Link href="/checkout" onClick={closeCart} className="mt-6 block">
