@@ -13,8 +13,22 @@ Updated as I go. Ordered by how much it blocks.
 ### Razorpay account
 Stripe cannot take domestic Indian payments. Razorpay is the standard.
 **I need:** an account, and the key id + secret.
-**Blocks:** checkout doing anything at all. Right now checkout collects details
-and stops. Nothing on this site can be bought.
+
+**What I changed tonight.** Checkout used to collect a full name, mobile, email
+and postal address, validate them, and then pop a browser alert saying payment
+was not connected. It looked like a real checkout right up until that alert, so
+a stranger had no way to know their address was going nowhere. It also promised
+"we pack by hand and write to you with a tracking number" while `/shipping` says
+no courier has been chosen — the site contradicting itself on the one page
+where money changes hands.
+
+Checkout is now an honest **concierge handover**: the buyer sees exactly what
+they are buying, gets a reference like `PK-LV37JA`, and is handed to you on
+Instagram. No personal data is collected, because there is nowhere to put it.
+
+**This means someone can actually buy something tonight** — through you, by
+message. That is how a shop selling one-of-one pieces at these prices usually
+works anyway. The address form comes back the day Razorpay is behind it.
 
 ### Real prices
 Every price in the catalogue is a placeholder I made up to have something to
@@ -117,7 +131,25 @@ changes what this shop is.
 
 ---
 
-## 6 · Smaller, whenever
+## 6 · Two things I could not build without infrastructure
+
+### Stock reservation
+Two people can currently both put the same one-of-one piece in their bag and
+both reach checkout. With the concierge handover this is survivable — you see
+both messages and can tell one of them — but it is the worst failure this shop
+can have once payments are live.
+
+A real fix needs shared server state (Vercel KV, Postgres, Upstash — any of
+them). It cannot be done in the browser, because two browsers cannot see each
+other. **Whichever you set up, tell me and I will wire it.**
+
+### Order records
+Same reason. Right now the reference is computed from the bag contents so both
+sides can quote it, but nothing is stored anywhere.
+
+---
+
+## 7 · Smaller, whenever
 
 - **Year the shop started** — for the footer copyright range
 - **Newsletter**: do you want one? Resend is already in the stack. About an hour
@@ -125,3 +157,5 @@ changes what this shop is.
   rather than ship a form that posts nowhere
 - **Ambient audio**: no track installed, so the Sound control is disabled
 - **Press or collectors**, if any exist — real ones only
+- **Packaging**: what does a piece actually arrive in? Roadmap item 10 wants
+  packaging treated as part of the brand, and I will not invent a box
