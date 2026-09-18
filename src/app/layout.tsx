@@ -9,6 +9,7 @@ import { CustomCursor } from "@/components/dom/CustomCursor";
 import { AppShell } from "@/components/ecommerce/AppShell";
 import { CartDrawer } from "@/components/ecommerce/CartDrawer";
 import { ScrollProgress } from "@/components/site/ScrollProgress";
+import { RouteCurtain } from "@/components/site/RouteCurtain";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -66,6 +67,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           you write. Body styling lives in globals.css instead. */}
       <body>
         <ScrollProgress />
+        {/* An overlay, NOT a wrapper around {children} — see the component. */}
+        <RouteCurtain />
         <CanvasMount />
         <ScrollTriggerReset />
         <CursorProvider>

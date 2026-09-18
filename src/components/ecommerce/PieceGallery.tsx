@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { RevealIn } from "@/components/type/useReveal";
+import { MaskedImage } from "@/components/site/MaskedImage";
 import { getShots, altFor } from "@/lib/shots";
 import type { Product } from "@/lib/catalog";
 import { Lightbox } from "./Lightbox";
@@ -49,36 +49,29 @@ export function PieceGallery({ product: p }: { product: Product }) {
     <>
       <div className="space-y-[clamp(0.75rem,1.5vw,1.25rem)]">
         {shots.map((s, i) => (
-          /* RevealIn, not whileInView: an image that starts at opacity 0 and
-             waits for an observer is an image that is GONE for anyone who
-             lands past it. See useReveal. */
-          <RevealIn key={s.src} amount={0.12} y={i === 0 ? 0 : 24}>
+          /* MASKED, not faded (item 73). A fade renders a half-present ghost
+             of the photograph for the better part of a second, which on a shop
+             selling colour and thread misrepresents the piece while it plays.
+             A travelling mask shows a smaller amount of correct image instead
+             of a full amount of wrong one. */
           <button
+            key={s.src}
             type="button"
             onClick={() => setOpen(i)}
             aria-label={`${altFor(p, s)} — open full screen`}
-            className="relative block w-full overflow-hidden"
-            style={{
-              aspectRatio: "3 / 4",
-              border: "1px solid rgba(26,26,26,0.14)",
-              background: "#F3EFE8",
-              padding: 0,
-              cursor: "zoom-in",
-            }}
+            className="relative block w-full"
+            style={{ border: "1px solid rgba(26,26,26,0.14)", padding: 0, cursor: "zoom-in" }}
           >
-            <Image
+            <MaskedImage
               src={s.src}
               alt={altFor(p, s)}
-              fill
-              quality={90}
               sizes="(max-width: 1024px) 94vw, 56vw"
+              quality={90}
               priority={i === 0}
-              loading={i === 0 ? undefined : "lazy"}
-              className="object-cover"
             />
 
             <span
-              className="ty-mono absolute bottom-0 left-0"
+              className="ty-mono absolute bottom-0 left-0 z-10"
               style={{
                 background: "rgba(250,248,245,0.94)",
                 color: "#1A1A1A",
@@ -88,7 +81,6 @@ export function PieceGallery({ product: p }: { product: Product }) {
               {s.frame}
             </span>
           </button>
-          </RevealIn>
         ))}
 
         <Caption />

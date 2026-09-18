@@ -135,7 +135,7 @@ export default function Home() {
             handoff. */}
         <section
           id="craft"
-          className="flex min-h-screen items-center justify-center px-[clamp(1.25rem,5vw,6rem)] py-32"
+          className="ground-paper flex min-h-screen items-center justify-center px-[clamp(1.25rem,5vw,6rem)] py-32"
           style={{ background: "#FAF8F5" }}
         >
           <VelocityDistort max={0.055} className="max-w-[52ch] text-center">
@@ -208,7 +208,7 @@ export default function Home() {
             keep — the actual reason this shop is different from a shop that
             reorders. */}
         <section
-          className="flex min-h-[85vh] items-center justify-center px-[clamp(1.25rem,5vw,6rem)] py-[clamp(4rem,12vh,9rem)]"
+          className="ground-woven flex min-h-[85vh] items-center justify-center px-[clamp(1.25rem,5vw,6rem)] py-[clamp(4rem,12vh,9rem)]"
           style={{ background: "#1A1A1A" }}
         >
           {/* An explicit width, not a ch measure: `ch` resolves against the

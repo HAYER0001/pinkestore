@@ -23,9 +23,16 @@ import { motion, useReducedMotion } from "motion/react";
  *      observer only ever sees ratio 0, so the element stays at opacity 0
  *      forever, on a page the reader is looking straight at.
  *
- * So: observe an element that is never clipped, and treat "you are above the
- * viewport" as revealed too — if the reader has already passed it, there is
- * nothing left to animate and everything left to show.
+ * THIS DOES NOT USE INTERSECTIONOBSERVER, and that is the point. IO only
+ * delivers a callback when the intersection ratio CROSSES a threshold. An
+ * instant jump takes an element from below the viewport (ratio 0) to above it
+ * (ratio 0) without ever intersecting — the ratio never changes, so no
+ * callback is delivered at all and the "top < 0" rescue above never gets to
+ * run. That is case 2 again, one level down, and it is why an IO version of
+ * this hook still left masks stuck over photographs.
+ *
+ * A rAF-coalesced scroll listener has no threshold semantics to get wrong. It
+ * measures position, and it removes itself the moment it fires.
  */
 export function useReveal<T extends Element>(amount = 0.3) {
   const ref = useRef<T | null>(null);
@@ -35,25 +42,47 @@ export function useReveal<T extends Element>(amount = 0.3) {
     const el = ref.current;
     if (!el) return;
 
-    /* No IntersectionObserver at all (very old browser, some test runners):
-       show everything rather than hiding the page. */
-    if (typeof IntersectionObserver === "undefined") {
-      setShown(true);
-      return;
-    }
+    let raf = 0;
+    let done = false;
 
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.intersectionRatio >= amount || e.boundingClientRect.top < 0) {
-          setShown(true);
-          io.disconnect();
-        }
-      },
-      { threshold: [...new Set([0, amount, 1])].sort((a, b) => a - b) },
-    );
+    const check = () => {
+      raf = 0;
+      if (done) return;
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight || 0;
 
-    io.observe(el);
-    return () => io.disconnect();
+      /* Denominator is the element height capped to the viewport: an element
+         TALLER than the screen can never reach a ratio of 1 against its own
+         height, so a 0.6 threshold on a full-bleed photograph would never
+         fire. */
+      const visible = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+      const denom = Math.max(1, Math.min(r.height, vh));
+      const ratio = visible > 0 ? visible / denom : 0;
+
+      if (ratio >= amount || r.top < 0) {
+        done = true;
+        setShown(true);
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+      }
+    };
+
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(check);
+    };
+
+    check();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    /* fonts and images change layout after first paint */
+    const t = setTimeout(check, 600);
+
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, [amount]);
 
   return [ref, shown] as const;

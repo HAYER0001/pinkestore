@@ -36,7 +36,7 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer style={{ background: "#F3EFE8", borderTop: "1px solid rgba(26,26,26,0.08)" }}>
+    <footer className="ground-paper" style={{ background: "#F3EFE8", borderTop: "1px solid rgba(26,26,26,0.08)" }}>
       <div className="mx-auto max-w-[1500px] px-[clamp(1rem,3vw,3rem)] py-[clamp(3.5rem,9vh,6rem)]">
         <div className="grid gap-[clamp(2.5rem,5vw,4rem)] lg:grid-cols-[1.25fr_2fr]">
           {/* ---------------- the house ---------------- */}
