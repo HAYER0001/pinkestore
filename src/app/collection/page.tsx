@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { PRODUCTS, CRAFTS, type Category } from "@/lib/catalog";
 import { spell } from "@/lib/site";
 import { PageShell } from "@/components/site/PageShell";
-import { ProductCard } from "@/components/ecommerce/ProductCard";
+import { CollectionGrid } from "@/components/ecommerce/CollectionGrid";
 
 /**
  * The full collection. Unlike the service routes, nothing here is stubbed —
@@ -68,17 +68,7 @@ export default async function CollectionPage(props: PageProps<"/collection">) {
         </ul>
       </nav>
 
-      {/* ProductCard is position:relative with every child absolute, so it has
-          no intrinsic height and collapses to a hairline in a plain block
-          wrapper. A GRID wrapper stretches it to the cell, which sets the
-          height without ProductCard needing to know it is being reused here. */}
-      <div className="grid gap-[clamp(1rem,2vw,2rem)] sm:grid-cols-2 lg:grid-cols-3">
-        {shown.map((p, i) => (
-          <div key={p.slug} style={{ aspectRatio: "3 / 4", display: "grid" }}>
-            <ProductCard product={p} priority={i < 3} />
-          </div>
-        ))}
-      </div>
+      <CollectionGrid products={shown} />
 
       <p className="ty-read measure-read mt-[clamp(3rem,7vh,5rem)]" style={{ color: "#6B645A" }}>
         Every piece is named by its technique, not by a mood. If you want to

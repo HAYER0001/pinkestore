@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { CRAFTS, PRODUCTS, type Craft } from "@/lib/catalog";
 import { POLICIES } from "@/lib/site";
 import { PageShell } from "@/components/site/PageShell";
-import { ProductCard } from "@/components/ecommerce/ProductCard";
+import { CollectionGrid } from "@/components/ecommerce/CollectionGrid";
 import { ThreadRule } from "@/components/brand/ThreadRule";
 import { MaterialStory, MakingTimeline } from "@/components/craft/MakingTimeline";
 
@@ -90,12 +90,8 @@ export default async function CraftPage(props: PageProps<"/craft/[technique]">) 
             .
           </p>
         ) : (
-          <div className="mt-[clamp(1.5rem,4vh,2.5rem)] grid gap-[clamp(1rem,2vw,2rem)] sm:grid-cols-2 lg:grid-cols-3">
-            {pieces.map((p, i) => (
-              <div key={p.slug} style={{ aspectRatio: "3 / 4", display: "grid" }}>
-                <ProductCard product={p} priority={i === 0} />
-              </div>
-            ))}
+          <div className="mt-[clamp(1.5rem,4vh,2.5rem)]">
+            <CollectionGrid products={pieces} />
           </div>
         )}
       </section>

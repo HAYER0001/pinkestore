@@ -53,16 +53,36 @@ box that only appears in development.
 
 ## 3 · Photography
 
-Four of five pieces now have frames. Thank you.
+Four of five pieces now have frames, and they are wired in. Thank you — they
+changed how the whole collection reads.
+
+**What I did with them.** They were 8–10 MB PNGs, 241 MB in total, which is far
+too heavy to serve. I converted them to WebP at 1400px wide: 241 MB → 14 MB,
+with no visible loss at the sizes they display. I also renamed the folders to
+`public/pieces/<slug>/` so the trailing space in `Baraat Shawl ` stopped being
+a problem. Nothing to do here.
+
+**Three frames I left out, and why.** I looked at all 28 individually. A
+gallery is a claim about what the object looks like, and the generator has no
+idea which object it is describing:
+
+- **Baraat Shawl 02** and **Sozni Ivory 02** — near-black macros. Both pieces
+  are ivory. A black close-up in the gallery for a cream shawl misleads someone
+  deciding at ₹42,000.
+- **Kairi Noir 05** — an ivory shawl with fringe. Kairi Noir has a black
+  ground. It is a different object.
+- **Kairi Noir 06** — a macro of raised metallic **embroidery**. Kairi Noir is
+  printed. Our second promise is that the printed one is labelled printed
+  everywhere; an embroidery close-up in its gallery contradicts that more
+  loudly than any label could correct.
+
+If you disagree with any of those calls, say so and I will put them back.
 
 **Still needed:**
-- **Lucknowi Chikankari** — no frames yet
-- Per piece, ideally 4–8: full, detail, edge, texture, reverse, scale, styled.
-  Consistent lighting, crop, background and colour temperature.
-
-**One thing to fix:** the folder `public/Baraat Shawl /` has a **trailing space**
-in its name. That will break image URLs once I wire the galleries up. Rename it
-to `public/baraat-shawl/` — or tell me to, and I will.
+- **Lucknowi Chikankari** — no frames yet. It is the one piece still on a single
+  photograph, and it shows next to the other four.
+- Useful extras for the four that are done: a **reverse** shot and something
+  with **scale** (worn, or beside a known object).
 
 ---
 
