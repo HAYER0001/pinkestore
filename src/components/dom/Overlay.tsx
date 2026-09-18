@@ -9,6 +9,7 @@ import { canvasStore } from "@/utils/animations/canvas-store";
 import { SoundController } from "./SoundController";
 import { Magnet } from "./Magnet";
 import { useCursor } from "./CursorContext";
+import { usePathname } from "next/navigation";
 import { useCartStore, selectCartCount } from "@/store/useCartStore";
 
 /**
@@ -38,6 +39,12 @@ export function Overlay() {
      handed off we are in the shop, and a fixed "scroll to explore" prompt
      there is both meaningless and physically collides with the Quick Add
      button at the bottom of the hero cell. */
+  const pathname = usePathname();
+  /* On commerce routes the page provides its own header; a second fixed one
+     overlapping the content is the reason the product page looked layered on
+     top of itself. */
+  const cinematic = pathname === "/";
+
   const { setTarget, clear } = useCursor();
   const openCart = useCartStore((s) => s.openCart);
   const count = useCartStore(selectCartCount);
@@ -46,11 +53,17 @@ export function Overlay() {
     onPointerLeave: clear,
   };
 
-  const intro = useSyncExternalStore(
+  const introActive = useSyncExternalStore(
     canvasStore.subscribe,
     canvasStore.getActive,
     () => true,
   );
+  const intro = cinematic && introActive;
+
+  /* The whole overlay is cinematic furniture. Commerce routes render
+     CommerceHeader in normal flow, and leaving this fixed layer mounted on top
+     of it produced two headers stacked on the same pixels. */
+  if (!cinematic) return null;
 
   return (
     <div

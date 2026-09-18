@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 
 /**
  * Client boundary for the WebGL layer.
@@ -23,6 +24,18 @@ const GlobalCanvas = dynamic(
   { ssr: false },
 );
 
+/**
+ * The cinematic layer belongs to the HOMEPAGE ONLY.
+ *
+ * It was mounted in the root layout, so the WebGL void and its gold dust were
+ * rendering behind the product and checkout pages too — which are designed for
+ * a light ground. The result was dark type on a dark canvas: technically
+ * "working", completely unreadable.
+ *
+ * Route-gating also means those pages never download three.js at all.
+ */
 export function CanvasMount() {
+  const pathname = usePathname();
+  if (pathname !== "/") return null;
   return <GlobalCanvas />;
 }

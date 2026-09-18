@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { PRODUCTS, CRAFTS, formatINR, getProduct, BRAND } from "@/lib/catalog";
 import { AddToBag } from "@/components/commerce/add-to-bag";
-import { Band } from "@/components/ornament/band";
+import { CommerceHeader } from "@/components/ecommerce/CommerceHeader";
 
 export function generateStaticParams() {
   return PRODUCTS.map((p) => ({ slug: p.slug }));
@@ -24,6 +24,11 @@ export async function generateMetadata(
   };
 }
 
+/**
+ * Raw Mango's structural move, which the competitive scan identified as the
+ * ceiling: a freely-scrolling image column against a STICKY information rail.
+ * The cloth gets the room; the decision never leaves the screen.
+ */
 export default async function ProductPage(props: PageProps<"/product/[slug]">) {
   const { slug } = await props.params;
   const p = getProduct(slug);
@@ -31,155 +36,260 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
 
   const craft = CRAFTS[p.craft];
   const others = PRODUCTS.filter((x) => x.slug !== p.slug).slice(0, 3);
+  const prov = p.provenance;
+  const real = (v?: string) => (v && !v.startsWith("NEEDS_REAL_DATA") ? v : null);
 
   return (
-    <main className="flex-1">
-      <div className="mx-auto max-w-6xl px-4 md:px-8">
-        <nav className="py-4">
-          <Link href="/" className="t-small text-pk-fg-muted hover:text-pk-fg">
+    <div style={{ background: "#FAF8F5", minHeight: "100svh" }}>
+      <CommerceHeader />
+
+      <main className="mx-auto max-w-[1500px] px-[clamp(1rem,3vw,3rem)]">
+        <nav className="py-6">
+          <Link
+            href="/#pieces"
+            className="t-micro-ed"
+            style={{ color: "#6B645A", letterSpacing: "var(--tracking-luxe)" }}
+          >
             ← All pieces
           </Link>
         </nav>
 
-        {/* Raw Mango's move: a free-scrolling image column against a sticky
-            rail. The cloth gets the room; the decision stays reachable. */}
-        <div className="grid gap-10 pb-20 md:grid-cols-2 md:gap-14">
+        <div className="grid gap-[clamp(2rem,4vw,5rem)] pb-24 lg:grid-cols-[1.15fr_1fr]">
+          {/* ---------- the cloth ---------- */}
           <div className="space-y-4">
-            <Image
-              src={p.image}
-              alt={`${p.name}, full view`}
-              width={p.width}
-              height={p.height}
-              quality={90}
-              sizes="(max-width: 768px) 100vw, 50vw"
-              loading="eager"
-              fetchPriority="high"
-              className="w-full rounded-sm border border-pk-border object-cover"
-            />
-            <p className="t-small text-pk-fg-subtle">
-              Photographed as it arrives — on the form, unstyled. What you see is
-              the actual piece, not a sample of the design.
+            <div
+              className="relative aspect-4/5 overflow-hidden"
+              style={{ border: "1px solid rgba(26,26,26,0.14)" }}
+            >
+              <Image
+                src={p.image}
+                alt={`${p.name}, ${craft.label}`}
+                fill
+                quality={90}
+                sizes="(max-width: 1024px) 94vw, 56vw"
+                priority
+                /* cropped into the weave — the source frames include a
+                   mannequin, a vase and a patterned carpet */
+                className="object-cover"
+                style={{ transform: "scale(1.6)", objectPosition: "40% 55%" }}
+              />
+            </div>
+            <div
+              className="relative aspect-4/5 overflow-hidden"
+              style={{ border: "1px solid rgba(26,26,26,0.14)" }}
+            >
+              <Image
+                src={p.image}
+                alt={`${p.name}, detail`}
+                fill
+                quality={90}
+                sizes="(max-width: 1024px) 94vw, 56vw"
+                loading="lazy"
+                className="object-cover"
+                style={{ transform: "scale(2.4)", objectPosition: "62% 38%" }}
+              />
+            </div>
+            <p
+              className="t-body-ed"
+              style={{ color: "#6B645A", fontSize: "0.875rem" }}
+            >
+              Photographed as it arrived. What you see is the actual piece, not
+              a sample of the design.
             </p>
           </div>
 
-          <div className="md:sticky md:top-24 md:h-fit md:pb-10">
-            <p className="t-micro text-pk-fg-subtle">{craft.label}</p>
-            <h1 className="font-display t-title mt-2 text-pk-fg">
+          {/* ---------- the rail ---------- */}
+          <div className="lg:sticky lg:top-28 lg:h-fit lg:pb-16">
+            <p
+              className="t-micro-ed"
+              style={{ color: "#8A6812", letterSpacing: "var(--tracking-luxe-wide)" }}
+            >
+              {craft.label} · {craft.region}
+            </p>
+
+            <h1
+              className="mt-5"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 300,
+                fontSize: "clamp(2.4rem, 4.6vw, 4rem)",
+                lineHeight: 0.98,
+                letterSpacing: "-0.035em",
+                color: "#1A1A1A",
+              }}
+            >
               {p.name}
               {p.nameLocal && (
-                <span lang={p.nameLocal.lang} className="ml-3 text-pk-fg-muted">
+                <span
+                  lang={p.nameLocal.lang}
+                  className="ml-4"
+                  style={{ color: "#6B645A", fontSize: "0.62em" }}
+                >
                   {p.nameLocal.text}
                 </span>
               )}
             </h1>
 
-            <p className="font-mono t-heading mt-4 text-pk-fg">
+            <p
+              className="mt-6"
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "1.25rem",
+                letterSpacing: "0.02em",
+                color: "#1A1A1A",
+              }}
+            >
               {formatINR(p.pricePaise)}
             </p>
 
-            {/* Honest scarcity. The scan found the whole category fakes this
-                with countdown timers while selling genuinely unique goods. */}
             {p.stock === 1 ? (
-              <p className="t-small mt-2 text-pk-accent">
-                One exists. When it goes, it is gone — these are not restocked.
+              <p
+                className="t-micro-ed mt-3"
+                style={{ color: "#8A2F3B", letterSpacing: "var(--tracking-luxe)" }}
+              >
+                One exists — these are not restocked
               </p>
             ) : p.stock > 1 ? (
-              <p className="t-small mt-2 text-pk-fg-muted">
-                {p.stock} available.
+              <p className="t-micro-ed mt-3" style={{ color: "#6B645A", letterSpacing: "var(--tracking-luxe)" }}>
+                {p.stock} available
               </p>
             ) : (
-              <p className="t-small mt-2 text-pk-fg-muted">Sold.</p>
+              <p className="t-micro-ed mt-3" style={{ color: "#6B645A", letterSpacing: "var(--tracking-luxe)" }}>
+                Sold
+              </p>
             )}
 
-            <p className="measure t-body mt-5 text-pk-fg-muted">{p.blurb}</p>
+            <p
+              className="t-body-ed mt-7 max-w-[42ch]"
+              style={{ color: "#3A352E", fontSize: "1.0625rem" }}
+            >
+              {p.blurb}
+            </p>
 
-            <AddToBag slug={p.slug} stock={p.stock} className="mt-7" />
+            <AddToBag slug={p.slug} stock={p.stock} className="mt-9" />
 
-            <Band variant="rule" className="my-8" />
+            {/* technique taught at the point of decision — the scan found
+                nobody in the category does this */}
+            <section className="mt-12 border-t border-[#1A1A1A]/14 pt-8">
+              <h2
+                className="t-micro-ed"
+                style={{ color: "#6B645A", letterSpacing: "var(--tracking-luxe-wide)" }}
+              >
+                How it is made
+              </h2>
+              <p
+                className="t-body-ed mt-4 max-w-[44ch]"
+                style={{ color: "#3A352E", fontSize: "1rem" }}
+              >
+                {craft.technique}
+              </p>
 
-            {/* Teach the technique at the moment of decision — the scan found
-                nobody in the category does this. */}
-            <section>
-              <h2 className="t-micro text-pk-fg-subtle">How it is made</h2>
-              <p className="measure t-body mt-3 text-pk-fg">{craft.technique}</p>
-              <dl className="mt-5 space-y-2">
+              <dl className="mt-7 space-y-0">
                 <Row label="Craft" value={craft.label} />
-                <Row label="Made in" value={p.provenance.madeIn} />
-                {p.provenance.artisan && (
-                  <Row label="Made by" value={p.provenance.artisan} />
-                )}
-                <Row
-                  label="By hand"
-                  value={craft.handmade ? "Yes, entirely" : "No — printed"}
-                />
-                {p.provenance.makingTime &&
-                  !p.provenance.makingTime.startsWith("NEEDS_REAL_DATA") && (
-                    <Row label="Time to make" value={p.provenance.makingTime} />
-                  )}
-                {p.provenance.dimensions &&
-                  !p.provenance.dimensions.startsWith("NEEDS_REAL_DATA") && (
-                    <Row label="Size" value={p.provenance.dimensions} />
-                  )}
-                {p.provenance.giCertificate && (
-                  <Row label="GI certificate" value={p.provenance.giCertificate} />
-                )}
+                <Row label="Made in" value={prov.madeIn} />
+                {prov.artisan && <Row label="Made by" value={prov.artisan} />}
+                <Row label="By hand" value={craft.handmade ? "Yes, entirely" : "No — printed"} />
+                {real(prov.makingTime) && <Row label="Time to make" value={real(prov.makingTime)!} />}
+                {real(prov.dimensions) && <Row label="Size" value={real(prov.dimensions)!} />}
+                {prov.giCertificate && <Row label="GI certificate" value={prov.giCertificate} />}
               </dl>
             </section>
 
-            <Band variant="rule" className="my-8" />
-
-            <section>
-              <h2 className="t-micro text-pk-fg-subtle">Buying from us</h2>
-              <ul className="mt-3 space-y-2">
-                <li className="t-small text-pk-fg-muted">
-                  Ships from {BRAND.city}, {BRAND.state}.
-                </li>
-                <li className="t-small text-pk-fg-muted">
-                  Every piece is checked and packed by hand before it leaves.
-                </li>
-                <li className="t-small text-pk-fg-muted">
-                  Questions about a piece? Ask before you buy — we would rather
-                  you were certain.
-                </li>
+            <section className="mt-10 border-t border-[#1A1A1A]/14 pt-8">
+              <h2
+                className="t-micro-ed"
+                style={{ color: "#6B645A", letterSpacing: "var(--tracking-luxe-wide)" }}
+              >
+                Buying from us
+              </h2>
+              <ul className="mt-4 space-y-2.5">
+                {[
+                  `Ships from ${BRAND.city}, ${BRAND.state}.`,
+                  "Checked and packed by hand before it leaves.",
+                  "Ask before you buy — we would rather you were certain.",
+                ].map((t) => (
+                  <li key={t} className="t-body-ed" style={{ color: "#6B645A", fontSize: "0.9375rem" }}>
+                    {t}
+                  </li>
+                ))}
               </ul>
             </section>
           </div>
         </div>
-      </div>
+      </main>
 
-      <Band variant="kairi" />
-
-      <section className="mx-auto max-w-6xl px-4 py-16 md:px-8">
-        <h2 className="font-display t-heading text-pk-fg">Also here</h2>
-        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {others.map((o) => (
-            <Link key={o.slug} href={`/product/${o.slug}`} className="group block">
-              <Image
-                src={o.image}
-                alt={o.name}
-                width={o.width}
-                height={o.height}
-                quality={75}
-                sizes="(max-width: 768px) 90vw, 30vw"
-                className="w-full rounded-sm border border-pk-border object-cover transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.02]"
-              />
-              <p className="t-body mt-3 text-pk-fg">{o.name}</p>
-              <p className="font-mono t-small text-pk-fg-muted">
-                {formatINR(o.pricePaise)}
-              </p>
-            </Link>
-          ))}
+      {/* ---------- also here ---------- */}
+      <section
+        className="border-t border-[#1A1A1A]/12"
+        style={{ background: "#F3EFE8" }}
+      >
+        <div className="mx-auto max-w-[1500px] px-[clamp(1rem,3vw,3rem)] py-20">
+          <h2
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 300,
+              fontSize: "clamp(1.6rem,3vw,2.4rem)",
+              letterSpacing: "-0.03em",
+              color: "#1A1A1A",
+            }}
+          >
+            Also here
+          </h2>
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
+            {others.map((o) => (
+              <Link key={o.slug} href={`/product/${o.slug}`} className="group block">
+                <div
+                  className="relative aspect-4/5 overflow-hidden"
+                  style={{ border: "1px solid rgba(26,26,26,0.14)" }}
+                >
+                  <Image
+                    src={o.image}
+                    alt={o.name}
+                    fill
+                    quality={80}
+                    sizes="(max-width: 640px) 92vw, 30vw"
+                    loading="lazy"
+                    className="object-cover"
+                    style={{ transform: "scale(1.7)", objectPosition: "40% 56%" }}
+                  />
+                </div>
+                <p
+                  className="mt-4"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1.25rem",
+                    color: "#1A1A1A",
+                  }}
+                >
+                  {o.name}
+                </p>
+                <p
+                  className="t-micro-ed mt-1"
+                  style={{ color: "#6B645A", letterSpacing: "var(--tracking-luxe)" }}
+                >
+                  {formatINR(o.pricePaise)}
+                </p>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-6 border-b border-pk-border pb-2">
-      <dt className="t-small text-pk-fg-subtle">{label}</dt>
-      <dd className="t-small text-right text-pk-fg">{value}</dd>
+    <div className="flex justify-between gap-8 border-b border-[#1A1A1A]/10 py-3">
+      <dt className="t-micro-ed" style={{ color: "#6B645A", letterSpacing: "var(--tracking-luxe)" }}>
+        {label}
+      </dt>
+      <dd
+        className="text-right"
+        style={{ fontFamily: "var(--font-body)", fontSize: "0.875rem", color: "#1A1A1A" }}
+      >
+        {value}
+      </dd>
     </div>
   );
 }
