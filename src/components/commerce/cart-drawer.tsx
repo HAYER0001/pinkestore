@@ -7,10 +7,11 @@ import Link from "next/link";
 import { useCart, hydrate, cartTotal } from "@/lib/cart";
 import { formatINR, CRAFTS } from "@/lib/catalog";
 import { Band } from "@/components/ornament/band";
+import { RollingINR } from "@/components/motion/rolling-number";
 
-/* Weighty, not bouncy. Higher mass + firm damping reads as a heavy drawer on
-   a good runner; a springy overshoot would read as a toy. */
-const DRAWER_SPRING = { type: "spring", stiffness: 240, damping: 34, mass: 1.1 } as const;
+/* Heavy physical drawer. It glides in and settles rather than stopping dead. */
+const DRAWER_SPRING = { type: "spring", stiffness: 100, damping: 15 } as const;
+const ITEM_SPRING = { type: "spring", stiffness: 140, damping: 20, mass: 0.6 } as const;
 
 export function CartDrawer() {
   const { lines, open, setOpen, setQty, remove } = useCart();
@@ -42,7 +43,7 @@ export function CartDrawer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+            transition={{ type: "spring", stiffness: 160, damping: 26 }}
             onClick={() => setOpen(false)}
             aria-hidden
           />
@@ -57,7 +58,7 @@ export function CartDrawer() {
             initial={reduced ? { opacity: 0 } : { x: "100%" }}
             animate={reduced ? { opacity: 1 } : { x: 0 }}
             exit={reduced ? { opacity: 0 } : { x: "100%" }}
-            transition={reduced ? { duration: 0.15 } : DRAWER_SPRING}
+            transition={reduced ? { type: "spring", stiffness: 400, damping: 40 } : DRAWER_SPRING}
           >
             <div className="flex items-baseline justify-between px-6 pt-6">
               <h2 className="font-display t-heading text-pk-fg">Your bag</h2>
@@ -87,8 +88,14 @@ export function CartDrawer() {
               </div>
             ) : (
               <ul className="flex-1 divide-y divide-pk-border overflow-y-auto px-6">
-                {items.map(({ product: p, qty, subtotalPaise }) => (
-                  <li key={p.slug} className="flex gap-4 py-5">
+                {items.map(({ product: p, qty, subtotalPaise }, i) => (
+                  <motion.li
+                    key={p.slug}
+                    className="flex gap-4 py-5"
+                    initial={reduced ? false : { opacity: 0, x: 28 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ ...ITEM_SPRING, delay: 0.12 + i * 0.07 }}
+                  >
                     <Link href={`/product/${p.slug}`} onClick={() => setOpen(false)}>
                       <Image
                         src={p.image}
@@ -136,7 +143,7 @@ export function CartDrawer() {
                     <p className="font-mono t-small text-pk-fg">
                       {formatINR(subtotalPaise)}
                     </p>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
             )}
@@ -145,9 +152,7 @@ export function CartDrawer() {
               <div className="border-t border-pk-border px-6 py-5">
                 <div className="flex items-baseline justify-between">
                   <span className="t-body text-pk-fg-muted">Subtotal</span>
-                  <span className="font-mono t-heading text-pk-fg">
-                    {formatINR(total)}
-                  </span>
+                  <RollingINR paise={total} className="font-mono t-heading text-pk-fg" />
                 </div>
                 <p className="t-small mt-1 text-pk-fg-subtle">
                   Shipping calculated at checkout.

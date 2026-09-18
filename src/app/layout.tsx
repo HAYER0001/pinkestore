@@ -10,6 +10,8 @@ import { MotifDefs } from "@/components/ornament/motif-defs";
 import { SiteHeader } from "@/components/commerce/site-header";
 import { CartDrawer } from "@/components/commerce/cart-drawer";
 import { PageFrame } from "@/components/ornament/page-frame";
+import { PageShell } from "@/components/motion/page-shell";
+import { Preloader } from "@/components/motion/preloader";
 import "./globals.css";
 
 /* Display. The WONK axis swells the stroke along its own path — the closest
@@ -84,9 +86,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col px-[22px] py-[22px]">
         <MotifDefs />
+        <Preloader />
         <PageFrame />
-        <SiteHeader />
-        {children}
+        <PageShell>
+          <SiteHeader />
+          {children}
+        </PageShell>
         <CartDrawer />
       </body>
     </html>
