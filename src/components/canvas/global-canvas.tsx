@@ -2,7 +2,8 @@
 
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
-import { ParticleField } from "./particle-field";
+import { MadhubaniParticles, particleBudget } from "./MadhubaniParticles";
+import { PerfHUD } from "./perf-hud";
 
 /**
  * THE GLOBAL CANVAS.
@@ -15,7 +16,10 @@ import { ParticleField } from "./particle-field";
  * pixels and is the single most common cause of a mobile WebGL build melting.
  */
 export function GlobalCanvas() {
+  const showHud = process.env.NODE_ENV === "development";
   return (
+    <>
+    {showHud && <PerfHUD particles={particleBudget()} />}
     <div
       aria-hidden
       style={{
@@ -42,9 +46,9 @@ export function GlobalCanvas() {
           gl.toneMapping = THREE.ACESFilmicToneMapping;
         }}
       >
-        <ambientLight intensity={0.6} />
-        <ParticleField />
+        <MadhubaniParticles />
       </Canvas>
     </div>
+    </>
   );
 }
