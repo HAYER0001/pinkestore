@@ -135,6 +135,7 @@ export function Overlay() {
         </span>
 
         <div
+          data-scroll-cue
           className="mx-auto md:mx-0 md:absolute md:left-1/2 md:-translate-x-1/2"
           style={{
             opacity: intro ? 1 : 0,

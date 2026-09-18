@@ -8,6 +8,7 @@ import { CursorProvider } from "@/components/dom/CursorContext";
 import { CustomCursor } from "@/components/dom/CustomCursor";
 import { AppShell } from "@/components/ecommerce/AppShell";
 import { CartDrawer } from "@/components/ecommerce/CartDrawer";
+import { ScrollProgress } from "@/components/site/ScrollProgress";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -64,6 +65,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           reports the difference as a hydration mismatch no matter which form
           you write. Body styling lives in globals.css instead. */}
       <body>
+        <ScrollProgress />
         <CanvasMount />
         <ScrollTriggerReset />
         <CursorProvider>

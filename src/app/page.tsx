@@ -8,6 +8,8 @@ import { DisplayComposition, Standfirst } from "@/components/type/DisplayComposi
 import { PullQuote } from "@/components/type/PullQuote";
 import { ChapterNav } from "@/components/type/ChapterNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { CtaPair } from "@/components/site/Cta";
+import { HeroDepth, HeroReveal } from "@/components/site/HeroDepth";
 
 /**
  * PHASE 5 — the editorial overlay.
@@ -50,9 +52,14 @@ export default function Home() {
             and would otherwise print straight through the shaili chip. */}
         <section
           id="origin"
-          className="flex h-[150vh] items-start px-[clamp(1.25rem,5vw,6rem)] pt-[15vh] lg:pl-[clamp(8rem,14vw,15rem)]"
+          className="relative flex h-[150vh] items-start px-[clamp(1.25rem,5vw,6rem)] pt-[10vh] lg:pl-[clamp(8rem,14vw,15rem)]"
         >
-          <div className="sticky top-[12vh]">
+          {/* atmosphere only — pointer-events:none, so it can never intercept
+              a click meant for the CTA behind it */}
+          <HeroDepth />
+
+          <div className="relative sticky top-[8vh] grid w-full items-center gap-[clamp(2rem,4vw,5rem)] xl:grid-cols-[minmax(0,1fr)_300px]">
+            <div>
             <p
               className="ty-mono"
               style={{
@@ -79,7 +86,7 @@ export default function Home() {
             />
 
             <Standfirst
-              className="mt-[clamp(2rem,4vw,3.5rem)]"
+              className="mt-[clamp(1.5rem,3vw,2.5rem)]"
               tone="#FFFFFF"
               style={{ mixBlendMode: "difference" }}
               delay={0.35}
@@ -87,6 +94,28 @@ export default function Home() {
               Hand-painted in Mithila, embroidered in Kashmir, stitched in
               Lucknow. Every piece exists once.
             </Standfirst>
+
+            {/* The homepage had NO call to action at all. Someone could read
+                the entire cinematic run and never be offered anywhere to go. */}
+            <CtaPair
+              className="mt-[clamp(1.25rem,2.5vh,2rem)]"
+              tone="#FAF8F5"
+              ground="#0A0B10"
+              primary={{ href: "/collection", label: "See the collection" }}
+              secondary={{ href: "/craft", label: "How it is made" }}
+            />
+            </div>
+
+            {/* ART DIRECTION, not decoration: type left, cloth right.
+                It lives INSIDE the hero's sticky block rather than in the flow
+                below it — placed after the section it landed straight on top
+                of the particle morph, which owns that whole 150vh. Two things
+                competing for one scroll range, again.
+                xl only: below that the morph motif and this column occupy the
+                same horizontal band. */}
+            <div className="hidden xl:block">
+              <HeroReveal />
+            </div>
           </div>
         </section>
 

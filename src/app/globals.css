@@ -762,3 +762,20 @@ input[type="search"]::-webkit-search-decoration {
   -webkit-appearance: none;
   appearance: none;
 }
+
+/* =========================================================================
+   THE SCROLL CUE YIELDS TO THE CTAs.
+
+   The cue is centred at the bottom of the viewport; the hero's CTA row is
+   left-aligned and reaches past the midline. On a tall screen they never
+   meet. On a 760px laptop the cue rises straight into "How it is made", and
+   no amount of vertical spacing in the hero fixes that — the two are
+   competing for the same band.
+
+   So below 820px the cue goes. It is a redundant instruction once there are
+   two real destinations on screen, and of the pair it is the one nobody came
+   for.
+   ========================================================================= */
+@media (max-height: 820px) {
+  [data-scroll-cue] { display: none; }
+}
