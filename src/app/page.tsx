@@ -10,6 +10,7 @@ import { ChapterNav } from "@/components/type/ChapterNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { CtaPair } from "@/components/site/Cta";
 import { PromiseList } from "@/components/site/Promise";
+import { FabricBand } from "@/components/site/FabricBand";
 import { HeroDepth, HeroReveal } from "@/components/site/HeroDepth";
 
 /**
@@ -177,6 +178,10 @@ export default function Home() {
             />
           </VelocityDistort>
         </section>
+
+        {/* A length of cloth drawn sideways as the page goes down — the
+            handover from why it costs what it costs to what is for sale. */}
+        <FabricBand />
 
         {/* ---------- 04 · the pieces ---------- */}
         <ProductGallery />
