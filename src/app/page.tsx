@@ -9,6 +9,7 @@ import { PullQuote } from "@/components/type/PullQuote";
 import { ChapterNav } from "@/components/type/ChapterNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { CtaPair } from "@/components/site/Cta";
+import { PromiseList } from "@/components/site/Promise";
 import { HeroDepth, HeroReveal } from "@/components/site/HeroDepth";
 
 /**
@@ -190,6 +191,15 @@ export default function Home() {
             One of one is not a scarcity tactic. It is simply what happens when
             the only tool is a hand.
           </PullQuote>
+
+          {/* The claim above is a sentence; these are the four things it
+              actually commits us to, each one testable. */}
+          <div
+            className="mx-auto max-w-[1100px] px-[clamp(1rem,5vw,4rem)] pb-[clamp(4rem,11vh,9rem)]"
+            style={{ background: "#F3EFE8" }}
+          >
+            <PromiseList />
+          </div>
         </div>
 
         {/* ---------- the closing statement (item 40) ----------

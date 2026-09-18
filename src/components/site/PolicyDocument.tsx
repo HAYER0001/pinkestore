@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { PageShell } from "./PageShell";
 import { type PolicyDoc, isComplete, missingFrom } from "@/lib/site";
 
@@ -30,7 +31,17 @@ export function policyMetadata(doc: PolicyDoc, description?: string): Metadata {
   };
 }
 
-export function PolicyDocument({ doc, eyebrow }: { doc: PolicyDoc; eyebrow?: string }) {
+export function PolicyDocument({
+  doc,
+  eyebrow,
+  children,
+}: {
+  doc: PolicyDoc;
+  eyebrow?: string;
+  /* For content that is not prose — the promise list on /about. Rendered
+     after the written sections and before the not-yet-written note. */
+  children?: ReactNode;
+}) {
   const written = doc.sections.filter((s) => s.body?.length);
   const missing = missingFrom(doc);
 
@@ -59,6 +70,8 @@ export function PolicyDocument({ doc, eyebrow }: { doc: PolicyDoc; eyebrow?: str
           ))}
         </div>
       )}
+
+      {children}
 
       {/* Rule 1 + 3. One honest line to the customer — no invented specifics,
           no fake completeness — and the full outstanding list only in dev. */}

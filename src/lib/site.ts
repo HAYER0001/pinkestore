@@ -82,6 +82,48 @@ export const NAV: NavGroup[] = [
   },
 ];
 
+/**
+ * THE PROMISE (item 32).
+ *
+ * Every line here is a claim the SITE ITSELF can be checked against, and the
+ * test suite checks them. That is the point: the competitive scan found GI
+ * badges with no certificate number, "handcrafted" on printed goods, and
+ * restock buttons on pieces sold as unique. Those are all promises too — they
+ * are just not kept.
+ *
+ * So nothing goes in this list unless a test can fail when it stops being
+ * true. A promise that cannot be falsified is marketing.
+ */
+export type Promise_ = {
+  title: string;
+  body: string;
+  /** how the claim is verified — shown to nobody, but it keeps this honest */
+  verifiedBy: string;
+};
+
+export const PROMISES: Promise_[] = [
+  {
+    title: "Stock is literal",
+    body: "Where a piece says one, there is one. Not one 'in this colourway', not one until the next batch — one. When it sells it comes down, because the next one would be a different object.",
+    verifiedBy: "Catalogue stock counts; the shop cannot render a quantity it does not hold.",
+  },
+  {
+    title: "The printed one says printed",
+    body: "Four of our five pieces are made entirely by hand. The fifth is printed, and it is labelled printed in the index, in the menu, and on its own page — in the same type as everything else, not buried in a description.",
+    verifiedBy: "Tests assert the word appears on the craft index, the mega-menu and the technique page.",
+  },
+  {
+    title: "We do not invent provenance",
+    body: "Where we do not know something — a measurement, a fibre, how long a piece took — the page simply does not show that line. It never shows a plausible guess. An invented number is the most confident-looking thing on any product page and the one a buyer repeats to someone else.",
+    verifiedBy: "Unknown fields render nothing; no page may contain placeholder copy.",
+  },
+  {
+    title: "No badge without a number",
+    body: "If we ever print a GI certification mark it will carry its certificate number. Until then there is no mark, because a seal with nothing behind it is the standard of this trade and not one worth meeting.",
+    verifiedBy: "The footer and product pages carry no trust badges at all.",
+  },
+];
+
 export type Section = {
   heading: string;
   /** Verified prose. Omit the field entirely when the answer is not yet known. */
