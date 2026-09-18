@@ -8,6 +8,7 @@ import { useSyncExternalStore } from "react";
 import { canvasStore } from "@/utils/animations/canvas-store";
 import { SoundController } from "./SoundController";
 import { Magnet } from "./Magnet";
+import { useCursor } from "./CursorContext";
 
 /**
  * THE FIXED CHROME.
@@ -36,6 +37,12 @@ export function Overlay() {
      handed off we are in the shop, and a fixed "scroll to explore" prompt
      there is both meaningless and physically collides with the Quick Add
      button at the bottom of the hero cell. */
+  const { setTarget, clear } = useCursor();
+  const linkProps = {
+    onPointerEnter: () => setTarget({ mode: "link" as const }),
+    onPointerLeave: clear,
+  };
+
   const intro = useSyncExternalStore(
     canvasStore.subscribe,
     canvasStore.getActive,
@@ -89,6 +96,7 @@ export function Overlay() {
               }}
               className="pointer-events-auto t-micro-ed"
               style={{ color: "var(--chrome-ink, #FFFFFF)", letterSpacing: "var(--tracking-luxe)" }}
+              {...linkProps}
             >
               {n.label}
             </a>

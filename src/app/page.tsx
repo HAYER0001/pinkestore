@@ -3,6 +3,7 @@ import { SequenceLoader } from "@/components/dom/sequence-loader";
 import { CinematicText } from "@/components/dom/CinematicText";
 import { PortalTransition } from "@/components/dom/PortalTransition";
 import { ProductGallery } from "@/components/ecommerce/ProductGallery";
+import { VelocityDistort } from "@/components/dom/VelocityDistort";
 
 /**
  * PHASE 5 — the editorial overlay.
@@ -72,7 +73,7 @@ export default function Home() {
           className="flex min-h-screen items-center justify-center px-[clamp(1.25rem,5vw,6rem)] py-32"
           style={{ background: "#FAF8F5" }}
         >
-          <div className="max-w-[52ch] text-center">
+          <VelocityDistort max={0.055} className="max-w-[52ch] text-center">
             <p
               className="t-micro-ed"
               style={{ color: "#8A6812", letterSpacing: "var(--tracking-luxe-widest)" }}
@@ -97,7 +98,7 @@ export default function Home() {
                 stagger={0.018}
               />
             </div>
-          </div>
+          </VelocityDistort>
         </section>
       </main>
     </>

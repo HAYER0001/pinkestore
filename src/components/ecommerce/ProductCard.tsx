@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { Magnetic } from "@/components/ui/magnetic";
 import { useCart } from "@/lib/cart";
+import { useCursor } from "@/components/dom/CursorContext";
 import { CRAFTS, formatINR, type Product } from "@/lib/catalog";
 
 /**
@@ -36,12 +37,23 @@ export function ProductCard({
   const add = useCart((s) => s.add);
   const ref = useRef<HTMLDivElement>(null);
   const craft = CRAFTS[p.craft];
+  const { setTarget, clear } = useCursor();
 
   return (
     <motion.div
       ref={ref}
-      onHoverStart={() => setHot(true)}
-      onHoverEnd={() => setHot(false)}
+      onHoverStart={() => {
+        setHot(true);
+        /* Hand the ring this card's box so it snaps to the frame instead of
+           floating over it. Measured on enter, not stored, because the grid
+           reflows on resize. */
+        const r = ref.current?.getBoundingClientRect();
+        if (r) setTarget({ mode: "product", rect: { x: r.x, y: r.y, w: r.width, h: r.height } });
+      }}
+      onHoverEnd={() => {
+        setHot(false);
+        clear();
+      }}
       style={{ gridArea: area, borderRadius: 0 }}
       className="relative overflow-hidden border border-[#1A1A1A]/15 bg-[#F3EFE8]"
     >

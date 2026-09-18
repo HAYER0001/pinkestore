@@ -5,6 +5,7 @@ import { ScrollTrigger } from "@/utils/animations/gsap";
 import { canvasStore } from "@/utils/animations/canvas-store";
 import { PRODUCTS, getProduct } from "@/lib/catalog";
 import { ProductCard } from "./ProductCard";
+import { VelocityDistort } from "@/components/dom/VelocityDistort";
 
 /**
  * THE SHOPPABLE GRID.
@@ -74,6 +75,11 @@ export function ProductGallery() {
       style={{ background: "#FAF8F5" }}
     >
       <div className="mx-auto max-w-[1500px] px-[clamp(1rem,3vw,3rem)] py-[clamp(4rem,10vh,9rem)]">
+        {/* The heading block takes the distortion; the GRID does not. Scaling
+            a grid of images stretches every photograph, which reads as a
+            rendering fault rather than as momentum — type tolerates it,
+            photography does not. */}
+        <VelocityDistort max={0.05}>
         <header className="mb-[clamp(2.5rem,6vh,5rem)] flex flex-wrap items-end justify-between gap-6">
           <div>
             <p
@@ -111,6 +117,7 @@ export function ProductGallery() {
             piece will be different, because different hands will have made it.
           </p>
         </header>
+        </VelocityDistort>
 
         {/* 12-column bento. Rows are viewport-relative so the hero stays
             genuinely large on a laptop without a fixed pixel height. */}

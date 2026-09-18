@@ -7,7 +7,7 @@ import { useCursor } from "./CursorContext";
 /**
  * DUAL-LAYER CURSOR.
  *
- *  · inner dot  — 4px, tracks clientX/Y with ZERO smoothing. This is what makes
+ *  · inner dot  — 2px, tracks clientX/Y with ZERO smoothing. This is what makes
  *    the cursor feel accurate; a single laggy blob always feels broken because
  *    the point of contact no longer matches the pointer.
  *  · outer ring — a Madhubani diamond trailing on a heavy spring. This is what
@@ -128,8 +128,11 @@ export function CustomCursor() {
           top: 0,
           x,
           y,
-          width: 4,
-          height: 4,
+          /* 2px as specified. At dpr>=2 that is 4 device pixels, which stays
+             crisp; on a 1x display it is faint but still the accurate point of
+             contact, which is what this layer is for. */
+          width: 2,
+          height: 2,
           translateX: "-50%",
           translateY: "-50%",
           background: "#FFFFFF",

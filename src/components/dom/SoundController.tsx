@@ -17,7 +17,16 @@ import { useEffect, useRef, useState } from "react";
  * itself rather than throwing — a missing asset must not break the page.
  */
 
-const SRC = "/audio/ambient.mp3";
+/* Ogg Vorbis first: MP3 carries ~50ms of encoder delay and padding, so a
+   looping MP3 has an audible seam at the loop point. Vorbis is gapless. MP3
+   stays as the fallback for anything that cannot decode Vorbis. */
+const SOURCES = ["/audio/ambient.ogg", "/audio/ambient.mp3"];
+
+function pickSource(): string {
+  if (typeof document === "undefined") return SOURCES[1];
+  const probe = document.createElement("audio");
+  return probe.canPlayType("audio/ogg; codecs=vorbis") ? SOURCES[0] : SOURCES[1];
+}
 const FADE_SECONDS = 3;
 const TARGET_GAIN = 0.32;
 
@@ -32,7 +41,7 @@ export function SoundController() {
   /* Probe for the file without downloading it. */
   useEffect(() => {
     let alive = true;
-    fetch(SRC, { method: "HEAD" })
+    fetch(pickSource(), { method: "HEAD" })
       .then((r) => alive && setAvailable(r.ok))
       .catch(() => alive && setAvailable(false));
     return () => {
@@ -57,7 +66,7 @@ export function SoundController() {
         window.AudioContext ??
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       const ctx = new AC();
-      const audio = new Audio(SRC);
+      const audio = new Audio(pickSource());
       audio.loop = true;
       audio.crossOrigin = "anonymous";
 
