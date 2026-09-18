@@ -8,6 +8,27 @@ Updated as I go. Ordered by how much it blocks.
 
 ---
 
+## Where the site got to overnight
+
+Phases 1–11 and 14–19 of the roadmap are built. **472 tests pass, none fail.**
+
+The three that matter most for you:
+
+- **Someone can buy something now.** Checkout is an honest concierge handover —
+  they see the piece, get a reference, and message you. It was a dead end.
+- **Your photographs are in**, converted from 241 MB of PNGs to 14 MB of WebP,
+  with three frames left out (reasons in §3).
+- **The whole site is one design now** — one header, one footer, one type
+  scale, one bag, across every route including 404 and error pages.
+
+I also found and fixed a class of bug I had introduced myself, four times over:
+content that starts hidden and waits for an IntersectionObserver callback that
+never arrives. It left headlines blank, masks stuck over photographs, and the
+mobile add-to-bag bar hidden from exactly the person it exists for. That
+primitive no longer uses IntersectionObserver at all.
+
+---
+
 ## 1 · Blocking real money
 
 ### Razorpay account
