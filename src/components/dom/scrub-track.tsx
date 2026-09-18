@@ -161,6 +161,10 @@ export function ScrubTrack() {
 
                   <Magnet range={110}>
                     <button
+                      /* Five of these exist, one per beat. Without a distinct
+                         name a screen-reader user hears "Add to bag" five
+                         times over with no way to tell which shawl is which. */
+                      aria-label={`Add ${product.name} to bag`}
                       type="button"
                       onClick={() => add(product.slug)}
                       style={{

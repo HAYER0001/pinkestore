@@ -23,11 +23,27 @@ import { QuickView } from "./QuickView";
 const SPANS = [7, 5, 4, 4, 4];
 const DROP = [false, true, false, false, false];
 
-export function CollectionGrid({ products }: { products: Product[] }) {
+export function CollectionGrid({
+  products,
+  /**
+   * An sr-only heading for the grid.
+   *
+   * The cards are h3, which is right on a technique page where a visible "The
+   * pieces" h2 already sits above them. On /collection nothing does, so the
+   * document jumped h1 -> h3 and anyone navigating by heading fell through a
+   * level with no idea what the list was.
+   */
+  label,
+}: {
+  products: Product[];
+  label?: string;
+}) {
   const [quick, setQuick] = useState<string | null>(null);
 
   return (
     <>
+      {label && <h2 className="sr-only">{label}</h2>}
+
       <div className="grid grid-cols-1 gap-x-[clamp(1rem,2.5vw,2.5rem)] gap-y-[clamp(2.5rem,6vh,4.5rem)] sm:grid-cols-12">
         {products.map((p, i) => {
           const slot = i % SPANS.length;

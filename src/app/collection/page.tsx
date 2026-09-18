@@ -68,7 +68,7 @@ export default async function CollectionPage(props: PageProps<"/collection">) {
         </ul>
       </nav>
 
-      <CollectionGrid products={shown} />
+      <CollectionGrid products={shown} label="The pieces" />
 
       <p className="ty-read measure-read mt-[clamp(3rem,7vh,5rem)]" style={{ color: "#6B645A" }}>
         Every piece is named by its technique, not by a mood. If you want to
