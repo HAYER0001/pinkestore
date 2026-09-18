@@ -117,7 +117,7 @@ export function SiteHeader() {
                     onPointerEnter={() => (n.menu ? mega.open(n.menu) : mega.close())}
                     onPointerLeave={() => n.menu && mega.close()}
                     onFocus={() => (n.menu ? mega.toggle(n.menu) : mega.closeNow())}
-                    className="ty-mono"
+                    className="ty-mono tap"
                     style={{
                       color: "#1A1A1A",
                       textDecoration: "none",
@@ -132,12 +132,12 @@ export function SiteHeader() {
               })}
             </nav>
 
-            <div className="flex items-center gap-6">
+            <div className="tap-row flex items-center gap-6">
               <button
                 type="button"
                 onClick={() => setSearching(true)}
                 aria-label="Search"
-                className="ty-mono"
+                className="ty-mono tap"
                 style={{ color: "#1A1A1A", background: "none", border: "none", padding: 0, cursor: "pointer" }}
               >
                 Search
@@ -153,7 +153,7 @@ export function SiteHeader() {
                 aria-label="Open menu"
                 aria-expanded={menu}
                 aria-controls="mobile-nav"
-                className="ty-mono lg:hidden"
+                className="ty-mono tap lg:hidden"
                 style={{ color: "#1A1A1A", background: "none", border: "none", padding: 0, cursor: "pointer" }}
               >
                 Menu

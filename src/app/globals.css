@@ -841,3 +841,37 @@ input[type="search"]::-webkit-search-decoration {
   .ground-paper::after,
   .ground-woven::after { display: none; }
 }
+
+/* =========================================================================
+   TAP TARGETS (item 86 — mobile as its own experience, not a squeezed desktop)
+
+   The chrome is set in 11px uppercase micro-type, which is right for the
+   design and gives a 17px-tall hit area. On a phone that is a miss waiting to
+   happen: Search, Menu and the bag are the primary navigation and all three
+   were under half the 44px both platform guidelines ask for.
+
+   Padding would fix it and would also push the header apart, so the hit area
+   is extended with a pseudo-element instead. The control keeps its exact
+   visual size and gains an invisible cushion around it.
+
+   Only on coarse pointers. On a trackpad a 17px target is fine and an
+   invisible 44px one would swallow clicks meant for its neighbours.
+   ========================================================================= */
+@media (pointer: coarse) {
+  .tap {
+    position: relative;
+  }
+  .tap::after {
+    content: "";
+    position: absolute;
+    /* to 44px tall from ~17, and a little horizontal slack */
+    inset: -14px -10px;
+    /* must not paint, must not clip, must still receive the touch */
+    pointer-events: auto;
+  }
+  /* Neighbouring cushions would otherwise overlap and steal each other's
+     touches, so anything in a tap row needs real space between it. */
+  .tap-row {
+    gap: max(1.5rem, var(--tap-gap, 1.5rem));
+  }
+}

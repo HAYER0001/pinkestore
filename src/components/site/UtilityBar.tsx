@@ -46,7 +46,7 @@ export function UtilityBar({ hidden }: { hidden: boolean }) {
           </span>
           <a
             href={BRAND.instagram}
-            className="ty-mono"
+            className="ty-mono tap"
             style={{ color: "#96605B", textDecoration: "none" }}
           >
             @the_pinkestore

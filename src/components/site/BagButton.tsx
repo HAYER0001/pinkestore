@@ -78,7 +78,7 @@ export function BagButton({
       /* The visible label is a numeral, which tells a screen reader nothing.
          The accessible name has to carry both what it opens and what is in it. */
       aria-label={`Bag — ${count} ${count === 1 ? "piece" : "pieces"}`}
-      className={`pointer-events-auto inline-flex items-center gap-2.5 ${className ?? ""}`}
+      className={`tap pointer-events-auto inline-flex items-center gap-2.5 ${className ?? ""}`}
       style={{
         color: tone,
         background: "none",

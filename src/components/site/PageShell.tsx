@@ -22,7 +22,7 @@ export type Crumb = { label: string; href?: string };
 export function Breadcrumbs({ trail }: { trail: Crumb[] }) {
   return (
     <nav aria-label="Breadcrumb" className="py-6">
-      <ol className="flex flex-wrap items-center gap-2" style={{ margin: 0, padding: 0, listStyle: "none" }}>
+      <ol className="tap-row flex flex-wrap items-center gap-2" style={{ margin: 0, padding: 0, listStyle: "none" }}>
         {trail.map((c, i) => (
           <li key={`${c.label}-${i}`} className="flex items-center gap-2">
             {i > 0 && (
@@ -33,7 +33,7 @@ export function Breadcrumbs({ trail }: { trail: Crumb[] }) {
             {c.href ? (
               <Link
                 href={c.href}
-                className="ty-mono"
+                className="ty-mono tap"
                 style={{ color: "#6B645A", textDecoration: "none" }}
               >
                 {c.label}
