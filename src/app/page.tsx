@@ -12,6 +12,51 @@ export default function Home() {
     <>
       <SequenceLoader />
       <main>
+        {/* ---- MORPH ZONE ----
+            150vh that belongs to the particles alone. The scrubber's
+            ScrollTrigger is anchored to #scrub-track, so the footage cannot
+            begin until this has been scrolled past. */}
+        <section
+          style={{
+            height: "150vh",
+            display: "flex",
+            alignItems: "center",
+            padding: "0 clamp(1rem, 5vw, 5rem)",
+            pointerEvents: "none",
+          }}
+        >
+          <div style={{ position: "sticky", top: "38vh" }}>
+            <p
+              style={{
+                fontFamily: "var(--font-geist-mono)",
+                fontSize: "clamp(10px,1vw,12px)",
+                letterSpacing: "0.28em",
+                color: "#E8BC57",
+              }}
+            >
+              शैली ०१ · मिथिला
+            </p>
+            <h1
+              style={{
+                fontFamily: "var(--font-display-serif)",
+                fontWeight: 300,
+                fontSize: "clamp(2.8rem, 9vw, 7.5rem)",
+                lineHeight: 0.92,
+                letterSpacing: "-0.04em",
+                color: "#F7F3EC",
+                margin: "0.3em 0 0",
+                mixBlendMode: "difference",
+              }}
+            >
+              The dust
+              <br />
+              remembers
+              <br />
+              the drawing
+            </h1>
+          </div>
+        </section>
+
         <ScrubTrack />
         <section
           style={{

@@ -5,6 +5,12 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { SIMPLEX_3D } from "./shaders/noise.glsl";
 import { scrubStore } from "@/utils/animations/scrub-store";
+import { gsap, ScrollTrigger } from "@/utils/animations/gsap";
+import { CustomEase } from "gsap/CustomEase";
+import { sampleSvgToPoints } from "@/utils/TextureSampler";
+import { mithilaMotifSvg } from "@/utils/motif-svg";
+
+if (typeof window !== "undefined") gsap.registerPlugin(CustomEase);
 
 /**
  * MADHUBANI PARTICLES — gold dust and floating thread.
@@ -35,16 +41,23 @@ uniform float uRepelRadius;
 uniform float uRepelStrength;
 uniform float uSizeScale;
 uniform float uReveal;   // 0 = dust everywhere, 1 = parted to the edges
+uniform float uMorph;    // 0 = chaotic dust, 1 = the motif is drawn
+uniform vec3  uMotifCentre;
 
 attribute float aSize;
 attribute float aSpeed;
 attribute float aMix;
 attribute float aPhase;
+attribute vec3  aTargetPosition;
+attribute float aDelay;   // 0..1, when this particle starts moving
+attribute float aSpin;    // -1 or +1, counter-rotating shells
 
 varying float vMix;
 varying float vTwinkle;
 varying float vPush;
 varying float vReveal;
+varying float vMorph;
+varying float vParked;
 
 void main() {
   vec3 origin = position;
@@ -70,6 +83,48 @@ void main() {
   // slow vertical rise, like dust in a sunbeam; wraps so the field never empties
   drifted.y += mod(uTime * 0.08 * aSpeed + aPhase * 10.0, 14.0) - 7.0;
 
+  // ---- the morph: chaotic dust -> Madhubani linework -------------------
+  // Staggered per particle so the motif DRAWS itself rather than snapping into
+  // existence. aDelay is derived from the target's distance to the motif
+  // centre, so the artwork resolves from the middle outward.
+  const float STAGGER = 0.55;
+  const float TWIST   = 3.1;
+  const float BULGE   = 1.5;
+
+  float local = clamp((uMorph - aDelay * STAGGER) / (1.0 - STAGGER), 0.0, 1.0);
+  float e = local * local * (3.0 - 2.0 * local);   // smoothstep ease
+
+  // particles with no home in the motif never travel
+  float parked = step(5000.0, aTargetPosition.x);
+  e *= (1.0 - parked);
+  vParked = parked;
+
+  if (e > 0.0) {
+    // the straight-line component — on its own this is the "cheap" morph
+    vec3 L = mix(drifted, aTargetPosition, e);
+
+    // SPIRAL: rotate about the motif centre by an angle that DECAYS to zero.
+    // Far from home the particle is heavily rotated; at e=1 rotation is
+    // exactly 0, so it lands on its target and not near it.
+    float th = (1.0 - e) * TWIST * aSpin;
+    vec2  rel = L.xy - uMotifCentre.xy;
+    float cs = cos(th), sn = sin(th);
+    vec2  rot = vec2(rel.x * cs - rel.y * sn, rel.x * sn + rel.y * cs);
+
+    vec3 P = vec3(uMotifCentre.xy + rot, L.z);
+
+    // ARC: bulge outward mid-flight. sin(e*PI) is 0 at BOTH ends and peaks at
+    // e=0.5, which is what turns a slide into a thrown thread.
+    float rl = length(rel) + 0.0001;
+    P.xy += (rel / rl) * sin(e * 3.14159265) * BULGE;
+
+    // turbulence that dies as it lands, so the arrival is crisp
+    P += flow * (1.0 - e) * 0.55;
+
+    drifted = P;
+  }
+  vMorph = e;
+
   // ---- mouse repulsion -----------------------------------------------
   // infl is 1 at the cursor and 0 at uRepelRadius. Squaring it keeps the
   // gradient away from the boundary — a linear falloff leaves a visible hard
@@ -80,8 +135,12 @@ void main() {
   vec3  dir  = away / max(d, 0.0001);            // guard the singularity at d==0
   float push = infl * infl;
 
-  drifted += dir * push * uRepelStrength;
-  vPush = push;
+  // Once the motif is drawn it becomes a rigid piece of art — the cursor can
+  // no longer disturb it. Scaling by (1-e) rather than gating on a branch
+  // keeps this smooth and branchless.
+  float repelGate = 1.0 - e;
+  drifted += dir * push * uRepelStrength * repelGate;
+  vPush = push * repelGate;
 
   // ---- the parting -----------------------------------------------------
   // As the sequence begins the field opens outward from the centre, so the
@@ -122,6 +181,8 @@ varying float vMix;
 varying float vTwinkle;
 varying float vPush;
 varying float vReveal;
+varying float vMorph;
+varying float vParked;
 
 void main() {
   // distance from the centre of the point sprite
@@ -147,7 +208,12 @@ void main() {
 
   // dust recedes as the footage takes over, but never fully — a thin veil of
   // gold over the cloth is the whole point
-  float alpha = disc * vTwinkle * (0.55 + vPush * 0.45) * (1.0 - vReveal * 0.62);
+  // As the motif forms, particles stop twinkling and hold steady — flicker
+  // reads as dust, but it reads as a rendering fault on a finished drawing.
+  float twinkle = mix(vTwinkle, 1.0, vMorph);
+  float alpha = disc * twinkle * (0.55 + vPush * 0.45) * (1.0 - vReveal * 0.62);
+  // parked particles (no home in the motif) fade out entirely as it forms
+  alpha *= (1.0 - vParked * vMorph);
 
   gl_FragColor = vec4(c, alpha);
 }
@@ -215,6 +281,20 @@ export function MadhubaniParticles() {
     g.setAttribute("aSpeed", new THREE.BufferAttribute(speeds, 1));
     g.setAttribute("aMix", new THREE.BufferAttribute(mixes, 1));
     g.setAttribute("aPhase", new THREE.BufferAttribute(phases, 1));
+
+    /* Morph targets. Allocated ONCE here and filled in place after the sampler
+       resolves — the constraint is no per-FRAME CPU writes, and this is a
+       single upload at load. Parked far off-screen until then. */
+    const targets = new Float32Array(count * 3).fill(9999);
+    const delays = new Float32Array(count);
+    const spins = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      delays[i] = rnd();
+      spins[i] = rnd() > 0.5 ? 1 : -1;
+    }
+    g.setAttribute("aTargetPosition", new THREE.BufferAttribute(targets, 3));
+    g.setAttribute("aDelay", new THREE.BufferAttribute(delays, 1));
+    g.setAttribute("aSpin", new THREE.BufferAttribute(spins, 1));
     /* the field never leaves view, so skip per-frame frustum maths */
     g.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), 40);
     return g;
@@ -238,6 +318,8 @@ export function MadhubaniParticles() {
           uRepelStrength: { value: 2.2 },
           uSizeScale: { value: 1 },
           uReveal: { value: 0 },
+          uMorph: { value: 0 },
+          uMotifCentre: { value: new THREE.Vector3(0, 0, 0) },
           uGold: { value: new THREE.Color("#D4AF37") },
           uRed: { value: new THREE.Color("#8B3A3A") },
           uCream: { value: new THREE.Color("#FAF8F5") },
@@ -245,6 +327,79 @@ export function MadhubaniParticles() {
       }),
     [],
   );
+
+  /* ---------- sample the motif, once ---------- */
+  useEffect(() => {
+    let alive = true;
+    sampleSvgToPoints({
+      svg: mithilaMotifSvg(),
+      rasterWidth: 420,
+      rasterHeight: 540,
+      threshold: 40,
+      maxPoints: count,
+      worldWidth: 15,
+      worldHeight: 19,
+    })
+      .then(({ positions, hitCount }) => {
+        if (!alive || hitCount === 0) return;
+        const attr = geometry.getAttribute("aTargetPosition") as THREE.BufferAttribute;
+        const delayAttr = geometry.getAttribute("aDelay") as THREE.BufferAttribute;
+        const arr = attr.array as Float32Array;
+        const dly = delayAttr.array as Float32Array;
+
+        arr.set(positions);
+
+        /* Re-derive delay from the target's distance to centre so the motif
+           resolves from the middle outward, instead of in random order. */
+        let maxR = 0.0001;
+        for (let i = 0; i < hitCount; i++) {
+          const x = positions[i * 3];
+          const y = positions[i * 3 + 1];
+          const r = Math.hypot(x, y);
+          if (r > maxR) maxR = r;
+        }
+        for (let i = 0; i < count; i++) {
+          dly[i] = i < hitCount
+            ? Math.min(Math.hypot(positions[i * 3], positions[i * 3 + 1]) / maxR, 1)
+            : 1;
+        }
+
+        attr.needsUpdate = true;
+        delayAttr.needsUpdate = true;
+      })
+      .catch(() => {
+        /* a failed raster must not break the dust — it simply never morphs */
+      });
+    return () => {
+      alive = false;
+    };
+  }, [count, geometry]);
+
+  /* ---------- scroll drives the morph, on a deliberate custom ease ---------- */
+  useEffect(() => {
+    const proxy = { v: 0 };
+    const ease = CustomEase.create("luxury", "M0,0 C0.25,0.1 0.25,1 1,1");
+
+    const tween = gsap.to(proxy, {
+      v: 1,
+      ease,
+      onUpdate: () => {
+        material.uniforms.uMorph.value = proxy.v;
+      },
+      scrollTrigger: {
+        trigger: document.documentElement,
+        start: 0,
+        end: () => window.innerHeight * 1.5,
+        scrub: 1.1,
+        invalidateOnRefresh: true,
+      },
+    });
+
+    return () => {
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
+  }, [material]);
 
   /* keep DPR uniform in sync — it changes when a window moves between displays */
   useEffect(() => {

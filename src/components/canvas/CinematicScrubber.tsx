@@ -200,8 +200,12 @@ export function CinematicScrubber() {
     velocity.current += (Math.min(framesPerSec / 26, 1) - velocity.current) * Math.min(1, delta * 6);
     material.uniforms.uVelocity.value = velocity.current;
 
-    /* fade the plane in only once frames exist */
-    const wantOpacity = gateReady ? 1 : 0;
+    /* Fade the plane in only once frames exist AND the scrub track has been
+       reached. Without the second condition the footage is already opaque at
+       scroll 0, which drowns the particle morph that owns the first 150vh. */
+    const trackProgress = scrubStore.getProgress();
+    const entered = Math.min(trackProgress / 0.04, 1);
+    const wantOpacity = gateReady ? entered : 0;
     material.uniforms.uOpacity.value +=
       (wantOpacity - material.uniforms.uOpacity.value) * Math.min(1, delta * 2.5);
 
