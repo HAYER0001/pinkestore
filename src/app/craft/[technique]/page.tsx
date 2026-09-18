@@ -6,6 +6,7 @@ import { POLICIES } from "@/lib/site";
 import { PageShell } from "@/components/site/PageShell";
 import { ProductCard } from "@/components/ecommerce/ProductCard";
 import { ThreadRule } from "@/components/brand/ThreadRule";
+import { MaterialStory, MakingTimeline } from "@/components/craft/MakingTimeline";
 
 const isCraft = (s: string): s is Craft => s in CRAFTS;
 
@@ -98,6 +99,12 @@ export default async function CraftPage(props: PageProps<"/craft/[technique]">) 
           </div>
         )}
       </section>
+
+      <ThreadRule tone="#C9A59F" slack={4} className="my-[clamp(2.5rem,7vh,5rem)]" />
+      <MaterialStory craft={technique} />
+
+      <ThreadRule tone="#C9A59F" slack={4} className="my-[clamp(2.5rem,7vh,5rem)]" />
+      <MakingTimeline craft={technique} />
 
       {care && (
         <>

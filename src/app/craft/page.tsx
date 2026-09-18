@@ -4,6 +4,7 @@ import { CRAFTS, PRODUCTS, type Craft } from "@/lib/catalog";
 import { spell } from "@/lib/site";
 import { PageShell } from "@/components/site/PageShell";
 import { ThreadRule } from "@/components/brand/ThreadRule";
+import { PlaceConstellation } from "@/components/craft/PlaceConstellation";
 
 export const metadata: Metadata = {
   title: "The Craft",
@@ -30,6 +31,13 @@ export default function CraftIndexPage() {
       standfirst={`${spell(handmade, true)} of the ${spell(entries.length)} are made entirely by hand, one is printed, and this page says which is which. Mithila painting is the look of this website; it is not the look of most of what we sell.`}
       trail={[{ label: "Home", href: "/" }, { label: "The Craft" }]}
     >
+      {/* Geographic storytelling before the list: the techniques make more
+          sense once you have seen that they come from four different places
+          and that none of them is where the shop is. */}
+      <PlaceConstellation />
+
+      <ThreadRule tone="#C9A59F" slack={4} className="my-[clamp(3rem,8vh,5.5rem)]" />
+
       <ul className="space-y-[clamp(2.5rem,6vh,4rem)]" style={{ margin: 0, padding: 0, listStyle: "none" }}>
         {entries.map(([slug, c], i) => {
           const count = PRODUCTS.filter((p) => p.craft === slug).length;
