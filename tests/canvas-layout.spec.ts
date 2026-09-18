@@ -75,11 +75,19 @@ test("scroll scrubs the webgl scene", async ({ page }) => {
     if (l) l.scrollTo(1600, { immediate: true });
     else window.scrollTo(0, 1600);
   });
-  await page.waitForTimeout(1800);
-  const after = await page.locator("canvas").screenshot();
+  /* POLL rather than sleep a fixed amount. Under the full suite five workers
+     share one software renderer, so the scene can take far longer to produce a
+     distinct frame than it does when this spec runs alone — a fixed wait made
+     this flaky for reasons that had nothing to do with the code under test. */
+  let changed = false;
+  for (let i = 0; i < 12 && !changed; i++) {
+    await page.waitForTimeout(500);
+    const after = await page.locator("canvas").screenshot();
+    changed = Buffer.compare(before, after) !== 0;
+  }
 
   expect(
-    Buffer.compare(before, after) !== 0,
+    changed,
     "canvas did not change after scrolling — ScrollTrigger is not driving the scene",
   ).toBe(true);
 });
