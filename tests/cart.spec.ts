@@ -20,7 +20,9 @@ test("drawer opens above everything and pushes the site back", async ({ page }) 
 
   const res = await page.evaluate(() => {
     const dialog = document.querySelector<HTMLElement>('[role="dialog"]');
-    const main = document.querySelector<HTMLElement>("main");
+    /* the pushback layer is AppShell, addressed explicitly — it is no
+       longer <main>, because a header and footer must not live inside one */
+    const main = document.querySelector<HTMLElement>("[data-app-shell]");
     return {
       open: !!dialog,
       /* the drawer must be a direct child of body — a portal — because the
@@ -98,10 +100,10 @@ test("stock cap is enforced in the store, not just the UI", async ({ page }) => 
      the next mutation — so the persisted blob still says 9 for a moment while
      the running cart already says 1. The header count is the honest signal. */
   const shown = await page.evaluate(() => {
-    const bag = [...document.querySelectorAll("button")].find((b) =>
-      /^Bag \(/.test(b.textContent ?? ""),
+    const bag = [...document.querySelectorAll("button")].find((x) =>
+      /^Bag —/.test(x.getAttribute("aria-label") ?? ""),
     );
-    const m = bag?.textContent?.match(/\((\d+)\)/);
+    const m = bag?.getAttribute("aria-label")?.match(/Bag — (\d+)/);
     return m ? Number(m[1]) : null;
   });
 

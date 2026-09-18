@@ -44,7 +44,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const active = isOpen || engaged;
 
   return (
-    <motion.main
+    /* A DIV, not <main>.
+       This is the layer that gets pushed back when the cart opens — a visual
+       wrapper, not the main content landmark. Marking it <main> put the site
+       header and footer INSIDE main (so the document had no banner and no
+       contentinfo landmark at all) and nested a second <main> inside it on
+       every page that declares its own. <main> must be unique per document. */
+    <motion.div
+      data-app-shell
       /* At rest this element must declare NO transform, NO filter and NO
          will-change. transform:scale(1) and filter:brightness(1) are not
          no-ops — any value other than `none` creates a containing block for
@@ -71,6 +78,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       transition={PUSH}
     >
       {children}
-    </motion.main>
+    </motion.div>
   );
 }

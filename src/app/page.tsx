@@ -7,6 +7,7 @@ import { VelocityDistort } from "@/components/dom/VelocityDistort";
 import { DisplayComposition, Standfirst } from "@/components/type/DisplayComposition";
 import { PullQuote } from "@/components/type/PullQuote";
 import { ChapterNav } from "@/components/type/ChapterNav";
+import { SiteFooter } from "@/components/site/SiteFooter";
 
 /**
  * PHASE 5 — the editorial overlay.
@@ -145,6 +146,10 @@ export default function Home() {
           </VelocityDistort>
         </section>
       </main>
+
+      {/* The page used to end here, mid-air, on the one route most likely to
+          be someone's first. */}
+      <SiteFooter />
     </>
   );
 }

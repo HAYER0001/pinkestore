@@ -11,7 +11,7 @@ import { Magnet } from "./Magnet";
 import { useCursor } from "./CursorContext";
 import { Wordmark } from "@/components/brand/Monogram";
 import { usePathname } from "next/navigation";
-import { useCartStore, selectCartCount } from "@/store/useCartStore";
+import { BagButton } from "@/components/site/BagButton";
 
 /**
  * THE FIXED CHROME.
@@ -41,14 +41,11 @@ export function Overlay() {
      there is both meaningless and physically collides with the Quick Add
      button at the bottom of the hero cell. */
   const pathname = usePathname();
-  /* On commerce routes the page provides its own header; a second fixed one
-     overlapping the content is the reason the product page looked layered on
-     top of itself. */
+  /* Every other route renders SiteHeader in normal flow; a second fixed one
+     overlapping it is the reason the product page looked layered on itself. */
   const cinematic = pathname === "/";
 
   const { setTarget, clear } = useCursor();
-  const openCart = useCartStore((s) => s.openCart);
-  const count = useCartStore(selectCartCount);
   const linkProps = {
     onPointerEnter: () => setTarget({ mode: "link" as const }),
     onPointerLeave: clear,
@@ -62,7 +59,7 @@ export function Overlay() {
   const intro = cinematic && introActive;
 
   /* The whole overlay is cinematic furniture. Commerce routes render
-     CommerceHeader in normal flow, and leaving this fixed layer mounted on top
+     SiteHeader in normal flow, and leaving this fixed layer mounted on top
      of it produced two headers stacked on the same pixels. */
   if (!cinematic) return null;
 
@@ -110,29 +107,21 @@ export function Overlay() {
         <div className="flex items-center gap-4 md:gap-7">
         <SoundController />
         <Magnet range={90}>
-        <button
-          type="button"
-          className="pointer-events-auto t-micro-ed whitespace-nowrap"
-          style={{
-            color: "var(--chrome-ink, #FFFFFF)",
-            letterSpacing: "var(--tracking-luxe)",
-            mixBlendMode: "var(--chrome-blend, difference)" as React.CSSProperties["mixBlendMode"],
-            background: "none",
-            border: "none",
-            padding: 0,
-            cursor: "pointer",
-          }}
-          onClick={openCart}
-          {...linkProps}
-        >
-          Bag ({count})
-        </button>
+          <BagButton
+            tone="var(--chrome-ink, #FFFFFF)"
+            blend="var(--chrome-blend, difference)"
+            {...linkProps}
+          />
         </Magnet>
         </div>
       </header>
 
-      {/* ---------------- bottom ---------------- */}
-      <footer className="flex items-end justify-between">
+      {/* ---------------- bottom ----------------
+          A div, NOT a <footer>. This is decorative cinematic furniture — two
+          labels and a scroll prompt. Marking it up as a footer gave the
+          homepage two contentinfo landmarks once the real site footer landed,
+          and left a screen-reader user choosing between them. */}
+      <div className="flex items-end justify-between">
         <span
           className="t-micro-ed hidden md:block"
           style={{
@@ -167,7 +156,7 @@ export function Overlay() {
         >
           Est. Mithila
         </span>
-      </footer>
+      </div>
     </div>
   );
 }

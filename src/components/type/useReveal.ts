@@ -26,7 +26,7 @@ import { useEffect, useRef, useState } from "react";
  * viewport" as revealed too — if the reader has already passed it, there is
  * nothing left to animate and everything left to show.
  */
-export function useReveal<T extends HTMLElement>(amount = 0.3) {
+export function useReveal<T extends Element>(amount = 0.3) {
   const ref = useRef<T | null>(null);
   const [shown, setShown] = useState(false);
 

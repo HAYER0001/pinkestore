@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { PRODUCTS, CRAFTS, formatINR, getProduct, BRAND } from "@/lib/catalog";
 import { AddToBag } from "@/components/commerce/add-to-bag";
-import { CommerceHeader } from "@/components/ecommerce/CommerceHeader";
+import { SiteHeader } from "@/components/site/SiteHeader";
+import { SiteFooter } from "@/components/site/SiteFooter";
 
 export function generateStaticParams() {
   return PRODUCTS.map((p) => ({ slug: p.slug }));
@@ -41,7 +42,7 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
 
   return (
     <div style={{ background: "#FAF8F5", minHeight: "100svh" }}>
-      <CommerceHeader />
+      <SiteHeader />
 
       <main className="mx-auto max-w-[1500px] px-[clamp(1rem,3vw,3rem)]">
         <nav className="py-6">
@@ -274,6 +275,8 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
           </div>
         </div>
       </section>
+
+      <SiteFooter />
     </div>
   );
 }

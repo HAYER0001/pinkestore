@@ -12,15 +12,25 @@ test("favicon renders from the monogram", async ({ page }) => {
 });
 
 test("wordmark is present and labelled on both header types", async ({ page }) => {
+  /* Scoped to the banner: since Phase 4 the footer carries the monogram with
+     the same accessible name, which is correct — two links to home, both
+     honestly labelled — but it makes an unscoped lookup ambiguous. */
   /* commerce route */
   await page.goto("/checkout");
   await page.waitForTimeout(1500);
-  await expect(page.getByLabel("The Pinkestore — home")).toBeVisible();
+  await expect(
+    page.getByRole("banner").getByLabel("The Pinkestore — home"),
+  ).toBeVisible();
 
   /* cinematic route */
   await page.goto("/");
   await page.waitForTimeout(2500);
-  await expect(page.getByLabel("The Pinkestore — home")).toBeVisible();
+  await expect(
+    page.getByRole("banner").getByLabel("The Pinkestore — home"),
+  ).toBeVisible();
+
+  /* and the footer's route home is real too */
+  await expect(page.locator("footer").getByLabel("The Pinkestore — home")).toHaveAttribute("href", "/");
 });
 
 test("brand tokens resolve", async ({ page }) => {

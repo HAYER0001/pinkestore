@@ -71,7 +71,10 @@ test("no pin-spacer gap and no horizontal overflow with the pin active", async (
 
 test("canvas composites transparently so the portal can reveal", async ({ page }) => {
   await page.goto("/");
-  await page.waitForTimeout(2000);
+  /* Poll, do not sleep. Under parallel load several Chromium instances share
+     one SwiftShader renderer and context creation overruns any fixed wait —
+     which shows up as a null canvas and reads exactly like a real regression. */
+  await page.waitForFunction(() => !!document.querySelector("canvas"), null, { timeout: 30_000 });
 
   const info = await page.evaluate(() => {
     const c = document.querySelector("canvas") as HTMLCanvasElement;

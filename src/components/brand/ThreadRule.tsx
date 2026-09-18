@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
+import { useReveal } from "@/components/type/useReveal";
 
 /**
  * THE THREAD — the signature device.
@@ -30,6 +31,9 @@ export function ThreadRule({
   className?: string;
 }) {
   const reduced = useReducedMotion();
+  /* Fail-visible: see useReveal. A reader who arrives already past this rule
+     would otherwise never see it draw, and it would sit at opacity 0 forever. */
+  const [ref, shown] = useReveal<SVGSVGElement>(0.6);
   const h = slack + weight * 4;
   const d = `M 0 ${weight * 2} C 260 ${weight * 2 + slack}, 740 ${weight * 2 + slack}, 1000 ${weight * 2}`;
 
@@ -37,14 +41,14 @@ export function ThreadRule({
     animate && !reduced
       ? {
           initial: { pathLength: 0, opacity: 0 },
-          whileInView: { pathLength: 1, opacity: 1 },
-          viewport: { once: true, amount: 0.6 },
+          animate: shown ? { pathLength: 1, opacity: 1 } : undefined,
           transition: { duration: 1.1, ease: [0.32, 0.72, 0, 1] as const },
         }
       : {};
 
   return (
     <svg
+      ref={ref}
       aria-hidden
       className={className}
       width={width}

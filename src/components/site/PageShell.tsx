@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { CommerceHeader } from "@/components/ecommerce/CommerceHeader";
+import { SiteHeader } from "./SiteHeader";
+import { SiteFooter } from "./SiteFooter";
 import { DisplayComposition, Standfirst } from "@/components/type/DisplayComposition";
 import { ThreadRule } from "@/components/brand/ThreadRule";
 
@@ -10,7 +11,7 @@ import { ThreadRule } from "@/components/brand/ThreadRule";
  * Deliberately NOT the homepage's cinematic chrome: the canvas is route-gated
  * to "/", the fixed Overlay returns null everywhere else, and these pages have
  * a light ground that a difference-blended overlay would fight rather than
- * complement. They get a real in-flow header instead.
+ * complement. They get the real sticky header instead.
  *
  * The heading is a DisplayComposition rather than a string set large, for the
  * same reason the homepage's is — a service page still belongs to the house.
@@ -67,7 +68,7 @@ export function PageShell({
 }) {
   return (
     <div style={{ background: "#FAF8F5", minHeight: "100svh" }}>
-      <CommerceHeader />
+      <SiteHeader />
 
       <main
         className={`mx-auto px-[clamp(1rem,3vw,3rem)] pb-[clamp(5rem,12vh,9rem)] ${
@@ -113,6 +114,8 @@ export function PageShell({
 
         {children}
       </main>
+
+      <SiteFooter />
     </div>
   );
 }

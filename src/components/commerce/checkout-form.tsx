@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCartStore, selectCartTotal } from "@/store/useCartStore";
 import { formatINR, CRAFTS, PRODUCTS, BRAND } from "@/lib/catalog";
-import { CommerceHeader } from "@/components/ecommerce/CommerceHeader";
+import { SiteHeader } from "@/components/site/SiteHeader";
 
 /* Indian delivery reality: a PIN code and a mobile number are not optional —
    couriers call before they deliver. */
@@ -28,7 +28,7 @@ export function CheckoutForm() {
   if (items.length === 0) {
     return (
       <div style={{ background: "#FAF8F5", minHeight: "100svh" }}>
-        <CommerceHeader />
+        <SiteHeader />
         <main className="mx-auto flex max-w-2xl flex-col items-center justify-center gap-6 px-6 py-40 text-center">
           <h1
             style={{
@@ -70,7 +70,7 @@ export function CheckoutForm() {
 
   return (
     <div style={{ background: "#FAF8F5", minHeight: "100svh" }}>
-      <CommerceHeader />
+      <SiteHeader />
 
       <main className="mx-auto max-w-[1300px] px-[clamp(1rem,3vw,3rem)] py-14">
         <p className="t-micro-ed" style={{ color: "#8A6812", letterSpacing: "var(--tracking-luxe-widest)" }}>

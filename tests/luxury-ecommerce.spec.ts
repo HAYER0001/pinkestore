@@ -111,8 +111,10 @@ test("cart: quick add updates the store, pushes the layout back, opens the drawe
   await page.waitForTimeout(2200);
 
   const before = await page.evaluate(() => {
-    const b = [...document.querySelectorAll("button")].find((x) => /^Bag \(/.test(x.textContent ?? ""));
-    return Number(b?.textContent?.match(/\((\d+)\)/)?.[1] ?? -1);
+    const b = [...document.querySelectorAll("button")].find((x) =>
+      /^Bag —/.test(x.getAttribute("aria-label") ?? ""),
+    );
+    return Number(b?.getAttribute("aria-label")?.match(/Bag — (\d+)/)?.[1] ?? -1);
   });
   expect(before).toBe(0);
 
@@ -124,11 +126,15 @@ test("cart: quick add updates the store, pushes the layout back, opens the drawe
 
   const after = await page.evaluate(() => {
     const dialog = document.querySelector<HTMLElement>('[role="dialog"]');
-    const main = document.querySelector<HTMLElement>("main");
-    const bag = [...document.querySelectorAll("button")].find((x) => /^Bag \(/.test(x.textContent ?? ""));
+    /* the pushback layer is AppShell, addressed explicitly — it is no
+       longer <main>, because a header and footer must not live inside one */
+    const main = document.querySelector<HTMLElement>("[data-app-shell]");
+    const bag = [...document.querySelectorAll("button")].find((x) =>
+      /^Bag —/.test(x.getAttribute("aria-label") ?? ""),
+    );
     const m = main ? new DOMMatrixReadOnly(getComputedStyle(main).transform) : null;
     return {
-      count: Number(bag?.textContent?.match(/\((\d+)\)/)?.[1] ?? -1),
+      count: Number(bag?.getAttribute("aria-label")?.match(/Bag — (\d+)/)?.[1] ?? -1),
       drawerOpen: !!dialog,
       drawerInView: dialog
         ? dialog.getBoundingClientRect().right > 0 &&
