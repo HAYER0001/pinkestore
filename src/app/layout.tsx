@@ -5,6 +5,8 @@ import { GlobalCanvas } from "@/components/canvas/global-canvas";
 import { Overlay } from "@/components/dom/Overlay";
 import { CursorProvider } from "@/components/dom/CursorContext";
 import { CustomCursor } from "@/components/dom/CustomCursor";
+import { AppShell } from "@/components/ecommerce/AppShell";
+import { CartDrawer } from "@/components/ecommerce/CartDrawer";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -65,7 +67,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <CursorProvider>
           <CustomCursor />
           <Overlay />
-          <SmoothScroll>{children}</SmoothScroll>
+          {/* AppShell is the layer that gets pushed back. The Overlay and the
+              CustomCursor above are SIBLINGS of it, so neither inherits the
+              blur or the stacking context the pushback creates. */}
+          <SmoothScroll>
+            <AppShell>{children}</AppShell>
+          </SmoothScroll>
+          <CartDrawer />
         </CursorProvider>
       </body>
     </html>

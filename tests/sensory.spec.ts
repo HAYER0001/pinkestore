@@ -6,7 +6,11 @@ import { test, expect } from "@playwright/test";
  * happened to CursorZone and VelocityDistort.
  */
 
-test("cursor: dual layer, blended, topmost, and hidden native cursor", async ({ page }) => {
+/* The custom cursor deliberately does NOT mount on coarse pointers — there is
+   no cursor to replace and `cursor: none` would hide nothing. Asserting it
+   exists on mobile tests the opposite of the intended behaviour. */
+test("cursor: dual layer, blended, topmost, and hidden native cursor", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === "mobile", "custom cursor is fine-pointer only by design");
   await page.goto("/");
   await page.waitForTimeout(2000);
   await page.mouse.move(700, 400);
@@ -38,7 +42,8 @@ test("cursor: dual layer, blended, topmost, and hidden native cursor", async ({ 
   expect(Math.max(...c!.sizes)).toBeGreaterThan(20);
 });
 
-test("cursor ring LOCKS onto a product card", async ({ page }) => {
+test("cursor ring LOCKS onto a product card", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === "mobile", "no cursor on touch devices");
   await page.goto("/");
   await page.waitForTimeout(2500);
   await page.evaluate(() => {

@@ -65,10 +65,17 @@ test("scroll scrubs the webgl scene", async ({ page }) => {
   await page.goto("/");
   await page.waitForTimeout(1500);
 
-  // capture the canvas before and after a scroll; the pixels must differ
+  /* Drive scroll through LENIS. window.scrollTo is overwritten on Lenis's very
+     next frame, so the page never actually moved and this compared two
+     identical frames — it was failing for the right reason, via the wrong
+     mechanism. */
   const before = await page.locator("canvas").screenshot();
-  await page.evaluate(() => window.scrollTo(0, 1600));
-  await page.waitForTimeout(1400);
+  await page.evaluate(() => {
+    const l = (window as unknown as { lenis?: { scrollTo: (n: number, o?: unknown) => void } }).lenis;
+    if (l) l.scrollTo(1600, { immediate: true });
+    else window.scrollTo(0, 1600);
+  });
+  await page.waitForTimeout(1800);
   const after = await page.locator("canvas").screenshot();
 
   expect(

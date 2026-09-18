@@ -9,6 +9,7 @@ import { canvasStore } from "@/utils/animations/canvas-store";
 import { SoundController } from "./SoundController";
 import { Magnet } from "./Magnet";
 import { useCursor } from "./CursorContext";
+import { useCartStore, selectCartCount } from "@/store/useCartStore";
 
 /**
  * THE FIXED CHROME.
@@ -38,6 +39,8 @@ export function Overlay() {
      there is both meaningless and physically collides with the Quick Add
      button at the bottom of the hero cell. */
   const { setTarget, clear } = useCursor();
+  const openCart = useCartStore((s) => s.openCart);
+  const count = useCartStore(selectCartCount);
   const linkProps = {
     onPointerEnter: () => setTarget({ mode: "link" as const }),
     onPointerLeave: clear,
@@ -118,8 +121,10 @@ export function Overlay() {
             padding: 0,
             cursor: "pointer",
           }}
+          onClick={openCart}
+          {...linkProps}
         >
-          Bag (0)
+          Bag ({count})
         </button>
         </Magnet>
         </div>
