@@ -1,72 +1,29 @@
 import type { Metadata } from "next";
-import {
-  Fraunces,
-  Inter,
-  Geist_Mono,
-  Noto_Sans_Devanagari,
-  Noto_Sans_Gurmukhi,
-} from "next/font/google";
-import { MotifDefs } from "@/components/ornament/motif-defs";
-import { SiteHeader } from "@/components/commerce/site-header";
-import { CartDrawer } from "@/components/commerce/cart-drawer";
-import { PageFrame } from "@/components/ornament/page-frame";
-import { PageShell } from "@/components/motion/page-shell";
-import { Preloader } from "@/components/motion/preloader";
+import { Cormorant_Garamond, Inter, Geist_Mono } from "next/font/google";
+import { SmoothScroll } from "@/components/layout/smooth-scroll";
+import { GlobalCanvas } from "@/components/canvas/global-canvas";
 import "./globals.css";
 
-/* Display. The WONK axis swells the stroke along its own path — the closest
-   type equivalent to Madhubani's double-line kachni contour. */
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const display = Cormorant_Garamond({
+  variable: "--font-display-serif",
   subsets: ["latin"],
-  axes: ["SOFT", "WONK", "opsz"],
+  weight: ["300", "400", "500", "600"],
   display: "swap",
 });
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-/* Indic partners. next/font emits these behind a unicode-range, so a
-   Latin-only page downloads zero bytes of them. */
-const notoDevanagari = Noto_Sans_Devanagari({
-  variable: "--font-noto-deva",
-  subsets: ["devanagari"],
-  display: "swap",
-});
-
-const notoGurmukhi = Noto_Sans_Gurmukhi({
-  variable: "--font-noto-guru",
-  subsets: ["gurmukhi"],
-  display: "swap",
-});
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"], display: "swap" });
+const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], display: "swap" });
 
 const SITE = "https://thepinkestore.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: "The Pinkestore — Handmade textiles, one piece at a time",
+    default: "The Pinkestore — Hand-painted Mithila textiles",
     template: "%s · The Pinkestore",
   },
   description:
-    "Kashmiri sozni pashminas, jamawar kani weaves, Lucknowi chikankari and hand-painted Mithila work. Every piece is one of one. A Punjab shop, carrying India's needle and loom traditions.",
-  openGraph: {
-    type: "website",
-    locale: "en_IN",
-    siteName: "The Pinkestore",
-    title: "The Pinkestore — Handmade textiles, one piece at a time",
-    description:
-      "Sozni, jamawar kani, chikankari and hand-painted Mithila. One of one, every time.",
-  },
+    "Hand-painted Mithila work, Kashmiri sozni and jamawar kani, Lucknowi chikankari. Every piece one of one, from Chandigarh.",
   robots: { index: true, follow: true },
 };
 
@@ -74,25 +31,22 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en-IN"
-      className={[
-        fraunces.variable,
-        inter.variable,
-        geistMono.variable,
-        notoDevanagari.variable,
-        notoGurmukhi.variable,
-        "h-full",
-      ].join(" ")}
+      className={`${display.variable} ${inter.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col px-[22px] py-[22px]">
-        <MotifDefs />
-        <Preloader />
-        <PageFrame />
-        <PageShell>
-          <SiteHeader />
-          {children}
-        </PageShell>
-        <CartDrawer />
+      {/*
+        TRANSPARENT ALL THE WAY DOWN.
+
+        The WebGL canvas sits at z-index -1 in the ROOT stacking context. For
+        `mix-blend-mode: difference` on the DOM text to actually see it, no
+        ancestor may create a new stacking context — so nothing here gets a
+        transform, filter, opacity or isolation. That is also why the previous
+        PageShell wrapper (which animated `scale` and `filter`) is not mounted
+        on this layout: it would have silently broken every blend mode.
+      */}
+      <body style={{ background: "transparent", minHeight: "100svh" }}>
+        <GlobalCanvas />
+        <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
   );

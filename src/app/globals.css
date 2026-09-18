@@ -187,12 +187,21 @@
   }
 
   html {
+    /* The root base colour, matching the WebGL clear colour.
+       The canvas sits at z-index -1, which paints ABOVE this background but
+       BELOW all in-flow content. Without a colour here the browser paints its
+       default white base underneath and the entire 3D scene is invisible —
+       transparent on <body> alone is not enough. */
+    background-color: #0A0B10;
     -webkit-text-size-adjust: 100%;
-    scroll-behavior: smooth;
+    /* NO scroll-behavior here. Lenis owns scrolling; a CSS smooth-scroll on
+       top of it produces two easing curves fighting over one scrollTop. */
   }
 
   body {
-    background-color: var(--pk-bg);
+    /* TRANSPARENT so the fixed WebGL canvas at z-index -1 reads through.
+       An opaque body here silently hides the entire 3D scene. */
+    background-color: transparent;
     color: var(--pk-fg);
     font-family: var(--font-sans);
     font-feature-settings: "cv11", "ss01";
@@ -234,7 +243,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
