@@ -559,3 +559,29 @@
     letter-spacing: 0.01em;
   }
 }
+
+/* ============================================================================
+   BENTO — responsive collapse
+   Explicit grid-area values are what make the desktop layout asymmetric, and
+   they are exactly what must be thrown away on a phone: a 12-column bento at
+   390px produces slivers. Below md every cell becomes full width in source
+   order, which is why the hero is first in the DOM.
+   ========================================================================= */
+
+@media (max-width: 767px) {
+  .pk-bento {
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: clamp(300px, 56vh, 460px) !important;
+  }
+  .pk-bento > * {
+    grid-area: auto !important;
+    grid-column: 1 / -1 !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  /* tablet: keep the hero big, let the rest stack in pairs */
+  .pk-bento {
+    grid-auto-rows: clamp(200px, 30vh, 280px) !important;
+  }
+}

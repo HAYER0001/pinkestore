@@ -3,6 +3,8 @@ import { Cormorant_Garamond, Jost, Geist_Mono } from "next/font/google";
 import { SmoothScroll } from "@/components/layout/smooth-scroll";
 import { GlobalCanvas } from "@/components/canvas/global-canvas";
 import { Overlay } from "@/components/dom/Overlay";
+import { CursorProvider } from "@/components/dom/CursorContext";
+import { CustomCursor } from "@/components/dom/CustomCursor";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -60,8 +62,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           you write. Body styling lives in globals.css instead. */}
       <body>
         <GlobalCanvas />
-        <Overlay />
-        <SmoothScroll>{children}</SmoothScroll>
+        <CursorProvider>
+          <CustomCursor />
+          <Overlay />
+          <SmoothScroll>{children}</SmoothScroll>
+        </CursorProvider>
       </body>
     </html>
   );

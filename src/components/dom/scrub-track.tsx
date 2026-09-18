@@ -1,35 +1,44 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { scrubStore } from "@/utils/animations/scrub-store";
+import { getProduct, CRAFTS, formatINR } from "@/lib/catalog";
+import { useCart } from "@/lib/cart";
+import { Magnet } from "./Magnet";
 
 /**
- * The scroll track. 450vh of runway that ScrollTrigger maps onto 144 frames.
+ * THE SCRUB TRACK — and the products that play ON it.
  *
- * The DOM here is deliberately almost empty — its job is to BE the scroll
- * distance. Copy is pinned in sticky viewports so it reads over the footage
- * without adding height of its own.
+ * The five clips ARE the five pieces. So the product does not wait in a grid
+ * below the film: as the footage scrubs into each clip, that piece's card
+ * rises with it and can be bought right there. The film is the merchandising.
+ *
+ * Each beat owns a window of scroll progress. Opacity and Y are derived from
+ * distance to the beat centre, so a card fades up as its clip arrives and
+ * falls away as the next one takes over — driven by scroll position, never by
+ * a timer, so scrubbing backwards plays it in reverse correctly.
  */
 
 const BEATS = [
-  { at: 0.06, k: "०१ · मिथिला", t: "Painted, not printed", s: "No pencil underneath. No second attempt." },
-  { at: 0.30, k: "०२ · कश्मीर", t: "Months, not minutes", s: "One sozni shawl can hold a year of someone's hands." },
-  { at: 0.54, k: "०३ · जामावार", t: "Woven one pass at a time", s: "Small wooden spools, a coded talim, no shortcut." },
-  { at: 0.76, k: "०४ · लखनऊ", t: "White on blush", s: "Shadow-work, worked from the reverse." },
-  { at: 0.93, k: "०५", t: "Yours, once", s: "When a piece goes, it is not restocked." },
+  { at: 0.09, slug: "madhubani-baraat-shawl", k: "०१ · मिथिला", line: "Painted, not printed", sub: "No pencil underneath. No second attempt." },
+  { at: 0.30, slug: "sozni-ivory-pashmina", k: "०२ · कश्मीर", line: "Months, not minutes", sub: "One sozni shawl can hold a year of someone's hands." },
+  { at: 0.52, slug: "jamawar-indigo-kani-shawl", k: "०३ · जामावार", line: "One pass at a time", sub: "Small wooden spools, a coded talim, no shortcut." },
+  { at: 0.73, slug: "chikankari-blush-suit-set", k: "०४ · लखनऊ", line: "White on blush", sub: "Shadow-work, worked from the reverse." },
+  { at: 0.92, slug: "kairi-noir-paisley-shawl", k: "०५", line: "Loud, worn quietly", sub: "A printed field of paisley on black." },
 ];
+
+const WINDOW = 0.13;
 
 export function ScrubTrack() {
   const [p, setP] = useState(0);
+  const add = useCart((s) => s.add);
 
-  /* Poll the external store on rAF instead of subscribing to every scroll
-     event — this component only needs to repaint when a beat crosses, not at
-     the 120Hz the scrubber itself runs at. */
   useEffect(() => {
     let raf = 0;
     let last = -1;
     const loop = () => {
-      const v = Math.round(scrubStore.getProgress() * 100) / 100;
+      const v = Math.round(scrubStore.getProgress() * 200) / 200;
       if (v !== last) {
         last = v;
         setP(v);
@@ -41,7 +50,7 @@ export function ScrubTrack() {
   }, []);
 
   return (
-    <div id="scrub-track" style={{ position: "relative", height: "450vh" }}>
+    <div id="scrub-track" style={{ position: "relative", height: "520vh" }}>
       <div
         style={{
           position: "sticky",
@@ -49,73 +58,134 @@ export function ScrubTrack() {
           height: "100svh",
           display: "flex",
           alignItems: "flex-end",
-          padding: "0 clamp(1rem, 5vw, 5rem) clamp(3rem, 9vh, 7rem)",
-          pointerEvents: "none",
+          padding: "0 clamp(1rem,5vw,5rem) clamp(2.5rem,8vh,6rem)",
         }}
       >
         <div style={{ position: "relative", width: "100%" }}>
           {BEATS.map((b) => {
-            /* each beat is lit within a window around its position */
             const d = Math.abs(p - b.at);
-            const on = 1 - Math.min(d / 0.1, 1);
+            const on = 1 - Math.min(d / WINDOW, 1);
+            const eased = on * on * (3 - 2 * on);
+            const product = getProduct(b.slug);
+            if (!product) return null;
+            const craft = CRAFTS[product.craft];
+            /* below ~2% the card is invisible; stop it eating pointer events */
+            const live = eased > 0.02;
+
             return (
               <div
-                key={b.k}
+                key={b.slug}
                 style={{
                   position: "absolute",
                   bottom: 0,
                   left: 0,
-                  opacity: on,
-                  transform: `translateY(${(1 - on) * 16}px)`,
+                  right: 0,
+                  opacity: eased,
+                  transform: `translateY(${(1 - eased) * 26}px)`,
+                  pointerEvents: live ? "auto" : "none",
+                  visibility: live ? "visible" : "hidden",
                   willChange: "opacity, transform",
                 }}
               >
                 <p
-                  style={{
-                    fontFamily: "var(--font-geist-mono)",
-                    fontSize: "clamp(10px,1vw,12px)",
-                    letterSpacing: "0.26em",
-                    color: "#E8BC57",
-                    marginBottom: "0.7rem",
-                  }}
+                  className="t-micro-ed"
+                  style={{ color: "#E8BC57", letterSpacing: "var(--tracking-luxe-wide)" }}
                 >
                   {b.k}
                 </p>
+
                 <h2
                   style={{
-                    fontFamily: "var(--font-display-serif)",
+                    fontFamily: "var(--font-display)",
                     fontWeight: 300,
-                    fontSize: "clamp(2.4rem, 7vw, 6rem)",
+                    fontSize: "clamp(2.2rem, 6.5vw, 5.5rem)",
                     lineHeight: 0.95,
                     letterSpacing: "-0.035em",
                     color: "#F7F3EC",
-                    margin: 0,
-                    textShadow: "0 2px 40px rgba(0,0,0,0.75)",
+                    margin: "0.35rem 0 0",
+                    textShadow: "0 2px 44px rgba(0,0,0,0.8)",
                   }}
                 >
-                  {b.t}
+                  {b.line}
                 </h2>
+
                 <p
                   style={{
-                    fontFamily: "var(--font-display-serif)",
+                    fontFamily: "var(--font-display)",
                     fontStyle: "italic",
-                    fontSize: "clamp(1rem, 1.8vw, 1.5rem)",
+                    fontSize: "clamp(1rem,1.7vw,1.4rem)",
                     color: "#F7F3EC",
-                    opacity: 0.82,
-                    maxWidth: "34ch",
-                    marginTop: "0.8rem",
-                    textShadow: "0 2px 30px rgba(0,0,0,0.8)",
+                    opacity: 0.8,
+                    maxWidth: "36ch",
+                    marginTop: "0.7rem",
+                    textShadow: "0 2px 30px rgba(0,0,0,0.85)",
                   }}
                 >
-                  {b.s}
+                  {b.sub}
                 </p>
+
+                {/* the piece, buyable on the film itself */}
+                <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-4">
+                  <Link
+                    href={`/product/${product.slug}`}
+                    style={{
+                      fontFamily: "var(--font-display)",
+                      fontSize: "clamp(1.1rem,2vw,1.6rem)",
+                      color: "#F7F3EC",
+                      textDecoration: "none",
+                      borderBottom: "1px solid rgba(247,243,236,0.35)",
+                      paddingBottom: "0.2rem",
+                    }}
+                  >
+                    {product.name}
+                  </Link>
+
+                  <span
+                    style={{
+                      fontFamily: "var(--font-body)",
+                      fontSize: "0.85rem",
+                      letterSpacing: "0.06em",
+                      color: "#F7F3EC",
+                      opacity: 0.8,
+                    }}
+                  >
+                    {formatINR(product.pricePaise)}
+                  </span>
+
+                  <span
+                    className="t-micro-ed"
+                    style={{ color: "#E8BC57", letterSpacing: "var(--tracking-luxe)" }}
+                  >
+                    {craft.region}
+                  </span>
+
+                  <Magnet range={110}>
+                    <button
+                      type="button"
+                      onClick={() => add(product.slug)}
+                      style={{
+                        fontFamily: "var(--font-body)",
+                        fontSize: "0.6875rem",
+                        letterSpacing: "var(--tracking-luxe)",
+                        textTransform: "uppercase",
+                        color: "#1A1A1A",
+                        background: "#F7F3EC",
+                        border: "1px solid #F7F3EC",
+                        borderRadius: 0,
+                        padding: "0.85rem 1.5rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Add to bag
+                    </button>
+                  </Magnet>
+                </div>
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* progress rule — the only chrome, bottom edge */}
       <div
         aria-hidden
         style={{
@@ -125,14 +195,7 @@ export function ScrubTrack() {
           background: "rgba(232,188,87,0.16)",
         }}
       >
-        <div
-          style={{
-            height: "100%",
-            width: `${p * 100}%`,
-            background: "#E8BC57",
-            transformOrigin: "left",
-          }}
-        />
+        <div style={{ height: "100%", width: `${p * 100}%`, background: "#E8BC57" }} />
       </div>
     </div>
   );

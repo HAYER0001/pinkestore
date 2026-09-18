@@ -2,6 +2,7 @@ import { ScrubTrack } from "@/components/dom/scrub-track";
 import { SequenceLoader } from "@/components/dom/sequence-loader";
 import { CinematicText } from "@/components/dom/CinematicText";
 import { PortalTransition } from "@/components/dom/PortalTransition";
+import { ProductGallery } from "@/components/ecommerce/ProductGallery";
 
 /**
  * PHASE 5 — the editorial overlay.
@@ -62,10 +63,14 @@ export default function Home() {
         {/* ---------- the portal: camera pushes through the fabric ---------- */}
         <PortalTransition />
 
+        {/* ---------- the shop: WebGL hands off here ---------- */}
+        <ProductGallery />
+
         {/* ---------- editorial close ---------- */}
         <section
           id="craft"
           className="flex min-h-screen items-center justify-center px-[clamp(1.25rem,5vw,6rem)] py-32"
+          style={{ background: "#FAF8F5" }}
         >
           <div className="max-w-[52ch] text-center">
             <p

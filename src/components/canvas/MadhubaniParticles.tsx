@@ -238,7 +238,7 @@ export function particleBudget() {
 
 export function MadhubaniParticles() {
   const pointsRef = useRef<THREE.Points>(null);
-  const { camera, pointer, size } = useThree();
+  const { camera, pointer, size, viewport } = useThree();
 
   const count = useMemo(particleBudget, []);
 
@@ -329,6 +329,14 @@ export function MadhubaniParticles() {
   );
 
   /* ---------- sample the motif, once ---------- */
+  /* Fit the drawing to the FRUSTUM, not to hardcoded units. The motif was 19
+     world units tall against a visible height of 2*14*tan(21deg) = 10.75 —
+     1.77x too big, so the painting was always cropped. Worse on a portrait
+     viewport, where the visible WIDTH collapses to under 6 units. */
+  const ART_ASPECT = 480 / 620;
+  const fitH = Math.min(viewport.height * 0.82, (viewport.width * 0.86) / ART_ASPECT);
+  const fitW = fitH * ART_ASPECT;
+
   useEffect(() => {
     let alive = true;
     sampleSvgToPoints({
@@ -337,8 +345,8 @@ export function MadhubaniParticles() {
       rasterHeight: 540,
       threshold: 40,
       maxPoints: count,
-      worldWidth: 15,
-      worldHeight: 19,
+      worldWidth: fitW,
+      worldHeight: fitH,
     })
       .then(({ positions, hitCount }) => {
         if (!alive || hitCount === 0) return;
@@ -373,7 +381,7 @@ export function MadhubaniParticles() {
     return () => {
       alive = false;
     };
-  }, [count, geometry]);
+  }, [count, geometry, fitW, fitH]);
 
   /* ---------- scroll drives the morph, on a deliberate custom ease ---------- */
   useEffect(() => {
@@ -415,6 +423,15 @@ export function MadhubaniParticles() {
   const scrollSmooth = useRef(0);
 
   useFrame((state, delta) => {
+    /* Test hook: lets a spec assert that the render loop genuinely STOPS on
+       handoff. Comparing canvas pixels cannot prove it — a zero-opacity layer
+       screenshots identically whether or not it is still rendering. Stripped
+       from production builds. */
+    if (process.env.NODE_ENV !== "production") {
+      const w = window as unknown as { __pkFrames?: number };
+      w.__pkFrames = (w.__pkFrames ?? 0) + 1;
+    }
+
     const u = material.uniforms;
     u.uTime.value = state.clock.elapsedTime;
 

@@ -4,6 +4,10 @@ import Link from "next/link";
 import { ScrollIndicator } from "./ScrollIndicator";
 import { scrollToId } from "@/utils/animations/scroll-to";
 import { useChromeTone } from "./useChromeTone";
+import { useSyncExternalStore } from "react";
+import { canvasStore } from "@/utils/animations/canvas-store";
+import { SoundController } from "./SoundController";
+import { Magnet } from "./Magnet";
 
 /**
  * THE FIXED CHROME.
@@ -27,6 +31,16 @@ const NAV = [
 
 export function Overlay() {
   useChromeTone();
+
+  /* The scroll indicator belongs to the cinematic intro. Once the canvas has
+     handed off we are in the shop, and a fixed "scroll to explore" prompt
+     there is both meaningless and physically collides with the Quick Add
+     button at the bottom of the hero cell. */
+  const intro = useSyncExternalStore(
+    canvasStore.subscribe,
+    canvasStore.getActive,
+    () => true,
+  );
 
   return (
     <div
@@ -81,6 +95,9 @@ export function Overlay() {
           ))}
         </nav>
 
+        <div className="flex items-center gap-7">
+        <SoundController />
+        <Magnet range={90}>
         <button
           type="button"
           className="pointer-events-auto t-micro-ed"
@@ -96,6 +113,8 @@ export function Overlay() {
         >
           Bag (0)
         </button>
+        </Magnet>
+        </div>
       </header>
 
       {/* ---------------- bottom ---------------- */}
@@ -104,7 +123,7 @@ export function Overlay() {
           className="t-micro-ed hidden md:block"
           style={{
             color: "var(--chrome-ink, #FFFFFF)",
-            opacity: 0.55,
+            opacity: intro ? 0.55 : 0,
             letterSpacing: "var(--tracking-luxe)",
             mixBlendMode: "var(--chrome-blend, difference)" as React.CSSProperties["mixBlendMode"],
           }}
@@ -112,7 +131,14 @@ export function Overlay() {
           One of one
         </span>
 
-        <div className="mx-auto md:mx-0 md:absolute md:left-1/2 md:-translate-x-1/2">
+        <div
+          className="mx-auto md:mx-0 md:absolute md:left-1/2 md:-translate-x-1/2"
+          style={{
+            opacity: intro ? 1 : 0,
+            visibility: intro ? "visible" : "hidden",
+            transition: "opacity 450ms cubic-bezier(0.32,0.72,0,1)",
+          }}
+        >
           <ScrollIndicator />
         </div>
 
@@ -120,7 +146,7 @@ export function Overlay() {
           className="t-micro-ed hidden md:block"
           style={{
             color: "var(--chrome-ink, #FFFFFF)",
-            opacity: 0.55,
+            opacity: intro ? 0.55 : 0,
             letterSpacing: "var(--tracking-luxe)",
             mixBlendMode: "var(--chrome-blend, difference)" as React.CSSProperties["mixBlendMode"],
           }}
