@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Jost, Geist_Mono } from "next/font/google";
 import { SmoothScroll } from "@/components/layout/smooth-scroll";
-import { GlobalCanvas } from "@/components/canvas/global-canvas";
+import { CanvasMount } from "@/components/canvas/CanvasMount";
+import { ScrollTriggerReset } from "@/components/canvas/ScrollTriggerReset";
 import { Overlay } from "@/components/dom/Overlay";
 import { CursorProvider } from "@/components/dom/CursorContext";
 import { CustomCursor } from "@/components/dom/CustomCursor";
@@ -63,7 +64,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           reports the difference as a hydration mismatch no matter which form
           you write. Body styling lives in globals.css instead. */}
       <body>
-        <GlobalCanvas />
+        <CanvasMount />
+        <ScrollTriggerReset />
         <CursorProvider>
           <CustomCursor />
           <Overlay />

@@ -11,9 +11,12 @@ export default defineConfig({
   },
   projects: [
     {
-      /* iPhone 13 viewport on Chromium. The stock iPhone profile runs WebKit,
-         which is a separate ~100MB download; the layout guards here are about
-         geometry and WebGL, not engine quirks, so Chromium is the right cost. */
+      /* iPhone 14 metrics (390x844 @3x, touch) on the Chromium engine.
+         The stock Playwright iPhone profiles run WebKit, a separate ~100MB
+         download; these guards test geometry, memory and WebGL rather than
+         engine quirks, so Chromium at the right metrics is the honest trade.
+         deviceScaleFactor 3 matters most — it is what drives the fill-rate
+         tiering we are verifying. */
       name: "mobile",
       use: {
         ...devices["Desktop Chrome"],

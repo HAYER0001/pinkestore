@@ -5,6 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { SIMPLEX_3D } from "./shaders/noise.glsl";
 import { scrubStore } from "@/utils/animations/scrub-store";
+import { detectDevice } from "@/utils/device-tier";
 import { gsap, ScrollTrigger } from "@/utils/animations/gsap";
 import { CustomEase } from "gsap/CustomEase";
 import { sampleSvgToPoints } from "@/utils/TextureSampler";
@@ -220,20 +221,11 @@ void main() {
 `;
 
 /**
- * Particle budget. A 3x-DPR phone rendering 50k additive sprites is fill-rate
- * suicide — the cost scales with PIXELS not vertices, so high DPR is the thing
- * to defend against, not CPU class.
+ * Particle budget now comes from the shared device tier so the scrubber and
+ * the particles cannot disagree about what class of machine they are on.
  */
 export function particleBudget() {
-  if (typeof window === "undefined") return 20000;
-  const dpr = window.devicePixelRatio || 1;
-  const w = window.innerWidth;
-  const cores = navigator.hardwareConcurrency ?? 4;
-
-  if (w < 768) return dpr >= 3 ? 9000 : 14000;
-  if (w < 1280) return dpr >= 2 ? 26000 : 34000;
-  if (cores <= 4) return 30000;
-  return 52000;
+  return detectDevice().particles;
 }
 
 export function MadhubaniParticles() {

@@ -60,11 +60,16 @@ export function PortalTransition() {
 
   return (
     <section ref={section} style={{ position: "relative", height: "300vh" }}>
+      {/* NORMAL FLOW, not position:absolute.
+          GSAP pins by switching the element to position:fixed and restoring it
+          afterwards. An absolutely-positioned child inside a relative parent
+          does not survive that round trip with pinSpacing:false — the pin
+          silently no-ops and the element just scrolls away, which is exactly
+          what the E2E caught (7425px of drift). The 300vh section supplies the
+          scroll length; this child is simply one viewport tall. */}
       <div
         ref={pinned}
         style={{
-          position: "absolute",
-          inset: 0,
           height: "100svh",
           display: "flex",
           flexDirection: "column",

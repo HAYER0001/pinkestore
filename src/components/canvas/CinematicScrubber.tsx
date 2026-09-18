@@ -7,6 +7,7 @@ import { gsap, ScrollTrigger } from "@/utils/animations/gsap";
 import { preloadFrames, sequenceSrc, FRAME_COUNT } from "@/utils/FramePreloader";
 import { scrubStore } from "@/utils/animations/scrub-store";
 import { portalStore } from "@/utils/animations/portal-store";
+import { detectDevice } from "@/utils/device-tier";
 
 /**
  * CINEMATIC SCRUBBER
@@ -100,7 +101,10 @@ const PLANE_Z = -3;
 
 export function CinematicScrubber() {
   const { viewport, size, camera } = useThree();
-  const lowRes = size.width < 768;
+  /* Shared tier rather than a bare width check: a 1000px-wide tablet at 3x DPR
+     needs the small sequence just as much as a phone does, and width alone
+     cannot see that. */
+  const lowRes = useMemo(() => detectDevice().lowResSequence || size.width < 768, [size.width]);
 
   const meshRef = useRef<THREE.Mesh>(null);
   const [gateReady, setGateReady] = useState(false);
@@ -262,8 +266,14 @@ export function CinematicScrubber() {
       geometry.dispose();
       material.dispose();
       texture.dispose();
+      /* texture.dispose() releases the GPU copy but NOT the 2D canvas backing
+         it. iOS counts every live canvas against a hard per-tab budget, and a
+         1280x720 backing store survives GC for as long as anything references
+         the element — zeroing the dimensions frees it immediately. */
+      canvas.width = 0;
+      canvas.height = 0;
     },
-    [geometry, material, texture],
+    [geometry, material, texture, canvas],
   );
 
   return (

@@ -160,6 +160,10 @@ export function ProductCard({
         >
           <button
             type="button"
+            /* "Quick add" alone is meaningless out of context — a screen
+               reader user hears five identical buttons with no way to tell
+               which shawl each one belongs to. */
+            aria-label={`Add ${p.name} to bag`}
             onClick={(e) => {
               e.preventDefault();
               add(p.slug);

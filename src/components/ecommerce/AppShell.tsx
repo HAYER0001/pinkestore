@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { useCartStore } from "@/store/useCartStore";
 
@@ -21,6 +21,16 @@ import { useCartStore } from "@/store/useCartStore";
  *
  * The fixed chrome (Overlay) and the custom cursor are SIBLINGS of this
  * wrapper, not children, so neither is affected.
+ *
+ * SECOND, SHARPER TRAP — found by the E2E, not by reading:
+ * `will-change: transform` creates a containing block for position:fixed
+ * descendants just as `transform` does. Declaring it permanently re-anchored
+ * GSAP's ScrollTrigger pin (which works by setting position:fixed) to THIS
+ * element instead of the viewport, so the pinned headline tracked scroll
+ * instead of holding — 7425px of drift with no error anywhere.
+ *
+ * So will-change is applied ONLY while the cart is open. Outside that window
+ * this element must create no containing block at all.
  */
 const PUSH = { type: "spring", stiffness: 120, damping: 20 } as const;
 
@@ -28,11 +38,25 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isOpen = useCartStore((s) => s.isOpen);
   const reduced = useReducedMotion();
 
+  /* Stays true through the close animation, then flips false so every
+     containing-block-creating property can be removed entirely. */
+  const [engaged, setEngaged] = useState(false);
+  const active = isOpen || engaged;
+
   return (
     <motion.main
-      style={{ transformOrigin: "50% 40%", willChange: "transform, filter" }}
+      /* At rest this element must declare NO transform, NO filter and NO
+         will-change. transform:scale(1) and filter:brightness(1) are not
+         no-ops — any value other than `none` creates a containing block for
+         fixed descendants, which re-anchors GSAP's pin away from the viewport.
+         So the style object is empty unless the push is actually engaged. */
+      style={
+        active
+          ? { transformOrigin: "50% 40%", willChange: "transform, filter" }
+          : { transformOrigin: "50% 40%" }
+      }
       animate={
-        reduced
+        reduced || !active
           ? undefined
           : {
               scale: isOpen ? 0.98 : 1,
@@ -40,6 +64,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               filter: isOpen ? "brightness(0.7) blur(2px)" : "brightness(1) blur(0px)",
             }
       }
+      onAnimationStart={() => setEngaged(true)}
+      onAnimationComplete={() => {
+        if (!isOpen) setEngaged(false);
+      }}
       transition={PUSH}
     >
       {children}
