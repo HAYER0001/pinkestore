@@ -1,6 +1,7 @@
 import { ScrubTrack } from "@/components/dom/scrub-track";
 import { SequenceLoader } from "@/components/dom/sequence-loader";
 import { CinematicText } from "@/components/dom/CinematicText";
+import { PortalTransition } from "@/components/dom/PortalTransition";
 
 /**
  * PHASE 5 — the editorial overlay.
@@ -58,6 +59,9 @@ export default function Home() {
         {/* ---------- the cinematic scrubber ---------- */}
         <ScrubTrack />
 
+        {/* ---------- the portal: camera pushes through the fabric ---------- */}
+        <PortalTransition />
+
         {/* ---------- editorial close ---------- */}
         <section
           id="craft"
@@ -66,7 +70,7 @@ export default function Home() {
           <div className="max-w-[52ch] text-center">
             <p
               className="t-micro-ed"
-              style={{ color: "#E8BC57", letterSpacing: "var(--tracking-luxe-widest)" }}
+              style={{ color: "#8A6812", letterSpacing: "var(--tracking-luxe-widest)" }}
             >
               The Craft
             </p>
@@ -75,7 +79,7 @@ export default function Home() {
                 as="h2"
                 text="Nothing here was made twice"
                 className="t-display-ed"
-                style={{ color: "#FFFFFF", mixBlendMode: "difference" }}
+                style={{ color: "#1B1916" }}
               />
             </div>
             <div className="mt-[clamp(2rem,4vw,3rem)]">
@@ -83,7 +87,7 @@ export default function Home() {
                 as="p"
                 text="A sozni shawl can hold a year of one person's hands. A kani weave advances one pass at a time against a coded talim. We do not restock, because the next piece will be different."
                 className="t-body-ed"
-                style={{ color: "#FFFFFF", opacity: 0.75, mixBlendMode: "difference" }}
+                style={{ color: "#1B1916", opacity: 0.72 }}
                 delay={0.2}
                 stagger={0.018}
               />

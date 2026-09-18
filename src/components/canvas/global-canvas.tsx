@@ -7,6 +7,8 @@ import * as THREE from "three";
 import { MadhubaniParticles, particleBudget } from "./MadhubaniParticles";
 import { PerfHUD } from "./perf-hud";
 import { CinematicScrubber } from "./CinematicScrubber";
+import { CameraController } from "./CameraController";
+import { PortalBackdrop } from "./PortalBackdrop";
 
 /**
  * THE GLOBAL CANVAS.
@@ -26,6 +28,7 @@ export function GlobalCanvas() {
   const showHud = process.env.NODE_ENV === "development" && budget !== null;
   return (
     <>
+    <PortalBackdrop />
     {showHud && <PerfHUD particles={budget} />}
     <div
       aria-hidden
@@ -43,16 +46,20 @@ export function GlobalCanvas() {
       <Canvas
         gl={{
           antialias: true,
-          alpha: false,
+          /* The portal dissolves the plane to reveal what is BEHIND the canvas.
+             With an opaque clear that reveal shows nothing but the clear
+             colour, so the canvas must composite transparently. */
+          alpha: true,
           powerPreference: "high-performance",
         }}
         dpr={[1, 2]}
         camera={{ position: [0, 0, 14], fov: 42, near: 0.1, far: 120 }}
         onCreated={({ gl }) => {
-          gl.setClearColor(new THREE.Color("#0A0B10"), 1);
+          gl.setClearColor(new THREE.Color("#0A0B10"), 0);
           gl.toneMapping = THREE.ACESFilmicToneMapping;
         }}
       >
+        <CameraController />
         <CinematicScrubber />
         <MadhubaniParticles />
       </Canvas>

@@ -12,11 +12,11 @@ export function ScrollIndicator({ label = "Scroll to explore" }: { label?: strin
   return (
     <div
       className="flex flex-col items-center gap-5"
-      style={{ mixBlendMode: "difference" }}
+      style={{ mixBlendMode: "var(--chrome-blend, difference)" as React.CSSProperties["mixBlendMode"] }}
     >
       <span
         className="t-micro-ed"
-        style={{ color: "#FFFFFF", letterSpacing: "var(--tracking-luxe-widest)" }}
+        style={{ color: "var(--chrome-ink, #FFFFFF)", letterSpacing: "var(--tracking-luxe-widest)" }}
       >
         {label}
       </span>
@@ -27,13 +27,13 @@ export function ScrollIndicator({ label = "Scroll to explore" }: { label?: strin
           position: "relative",
           width: 1,
           height: 60,
-          background: "rgba(255,255,255,0.5)",
+          background: "color-mix(in srgb, var(--chrome-ink, #FFF) 50%, transparent)",
           overflow: "hidden",
         }}
       >
         {!reduced && (
           <motion.div
-            style={{ position: "absolute", left: 0, width: 1, height: 15, background: "#FFFFFF" }}
+            style={{ position: "absolute", left: 0, width: 1, height: 15, background: "var(--chrome-ink, #FFFFFF)" }}
             initial={{ y: -15 }}
             animate={{ y: 60 }}
             transition={{

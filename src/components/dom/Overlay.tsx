@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ScrollIndicator } from "./ScrollIndicator";
 import { scrollToId } from "@/utils/animations/scroll-to";
+import { useChromeTone } from "./useChromeTone";
 
 /**
  * THE FIXED CHROME.
@@ -25,6 +26,8 @@ const NAV = [
 ];
 
 export function Overlay() {
+  useChromeTone();
+
   return (
     <div
       className="pointer-events-none fixed inset-0 z-40 flex flex-col justify-between"
@@ -35,18 +38,18 @@ export function Overlay() {
         <Link
           href="/"
           className="pointer-events-auto"
-          style={{ mixBlendMode: "difference" }}
+          style={{ mixBlendMode: "var(--chrome-blend, difference)" as React.CSSProperties["mixBlendMode"] }}
         >
           <span
             className="t-micro-ed block"
-            style={{ color: "#FFFFFF", letterSpacing: "var(--tracking-luxe-widest)" }}
+            style={{ color: "var(--chrome-ink, #FFFFFF)", letterSpacing: "var(--tracking-luxe-widest)" }}
           >
             The Pinkestore
           </span>
           <span
             className="t-micro-ed block"
             style={{
-              color: "#FFFFFF",
+              color: "var(--chrome-ink, #FFFFFF)",
               opacity: 0.55,
               letterSpacing: "var(--tracking-luxe)",
               marginTop: "0.45rem",
@@ -58,7 +61,7 @@ export function Overlay() {
 
         <nav
           className="hidden items-center gap-10 md:flex"
-          style={{ mixBlendMode: "difference" }}
+          style={{ mixBlendMode: "var(--chrome-blend, difference)" as React.CSSProperties["mixBlendMode"] }}
         >
           {NAV.map((n) => (
             <a
@@ -71,7 +74,7 @@ export function Overlay() {
                 scrollToId(n.href);
               }}
               className="pointer-events-auto t-micro-ed"
-              style={{ color: "#FFFFFF", letterSpacing: "var(--tracking-luxe)" }}
+              style={{ color: "var(--chrome-ink, #FFFFFF)", letterSpacing: "var(--tracking-luxe)" }}
             >
               {n.label}
             </a>
@@ -82,9 +85,9 @@ export function Overlay() {
           type="button"
           className="pointer-events-auto t-micro-ed"
           style={{
-            color: "#FFFFFF",
+            color: "var(--chrome-ink, #FFFFFF)",
             letterSpacing: "var(--tracking-luxe)",
-            mixBlendMode: "difference",
+            mixBlendMode: "var(--chrome-blend, difference)" as React.CSSProperties["mixBlendMode"],
             background: "none",
             border: "none",
             padding: 0,
@@ -100,10 +103,10 @@ export function Overlay() {
         <span
           className="t-micro-ed hidden md:block"
           style={{
-            color: "#FFFFFF",
+            color: "var(--chrome-ink, #FFFFFF)",
             opacity: 0.55,
             letterSpacing: "var(--tracking-luxe)",
-            mixBlendMode: "difference",
+            mixBlendMode: "var(--chrome-blend, difference)" as React.CSSProperties["mixBlendMode"],
           }}
         >
           One of one
@@ -116,10 +119,10 @@ export function Overlay() {
         <span
           className="t-micro-ed hidden md:block"
           style={{
-            color: "#FFFFFF",
+            color: "var(--chrome-ink, #FFFFFF)",
             opacity: 0.55,
             letterSpacing: "var(--tracking-luxe)",
-            mixBlendMode: "difference",
+            mixBlendMode: "var(--chrome-blend, difference)" as React.CSSProperties["mixBlendMode"],
           }}
         >
           Est. Mithila

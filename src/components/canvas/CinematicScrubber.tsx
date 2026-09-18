@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { gsap, ScrollTrigger } from "@/utils/animations/gsap";
 import { preloadFrames, sequenceSrc, FRAME_COUNT } from "@/utils/FramePreloader";
 import { scrubStore } from "@/utils/animations/scrub-store";
+import { portalStore } from "@/utils/animations/portal-store";
 
 /**
  * CINEMATIC SCRUBBER
@@ -44,6 +45,7 @@ uniform sampler2D uTexture;
 uniform float uVelocity;   // 0..1 smoothed scroll speed
 uniform float uOpacity;
 uniform float uTime;
+uniform float uCameraDistance;  // camera.z - plane.z, falls toward 0 and past it
 
 varying vec2 vUv;
 
@@ -75,7 +77,22 @@ void main() {
   float vig = smoothstep(1.35, 0.72, length(fromCentre));
   col *= mix(1.0, vig, 0.35);
 
-  gl_FragColor = vec4(col, uOpacity);
+  // ---- THE PORTAL -----------------------------------------------------
+  // The camera must never simply clip through this plane — a hard near-plane
+  // slice looks like a rendering bug, not an effect. Instead a hole opens from
+  // the centre outward as the camera closes in, so the fabric parts and the
+  // layer behind shows through.
+  //
+  // prox: 0 while the camera is far, 1 once it is at the plane.
+  float prox = 1.0 - smoothstep(0.0, 9.0, uCameraDistance);
+
+  // dCentre is 0 at screen centre, ~1.0 at the edges. The hole radius grows
+  // with prox, and the smoothstep band gives it a soft, burning edge rather
+  // than a cut-out circle.
+  float dCentre = length(vUv - 0.5) * 2.0;
+  float hole = smoothstep(prox * 1.55 - 0.28, prox * 1.55, dCentre);
+
+  gl_FragColor = vec4(col, uOpacity * hole);
 }
 `;
 
@@ -130,6 +147,7 @@ export function CinematicScrubber() {
           uVelocity: { value: 0 },
           uOpacity: { value: 0 },
           uTime: { value: 0 },
+          uCameraDistance: { value: 999 },
         },
       }),
     [texture],
@@ -189,6 +207,7 @@ export function CinematicScrubber() {
 
   useFrame((state, delta) => {
     material.uniforms.uTime.value = state.clock.elapsedTime;
+    material.uniforms.uCameraDistance.value = portalStore.cameraDistance;
 
     /* frame-rate independent glide toward the scroll target */
     const k = 1 - Math.pow(0.0008, delta);
