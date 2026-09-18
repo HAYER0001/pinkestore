@@ -1,84 +1,94 @@
 import { ScrubTrack } from "@/components/dom/scrub-track";
 import { SequenceLoader } from "@/components/dom/sequence-loader";
+import { CinematicText } from "@/components/dom/CinematicText";
 
 /**
- * PHASE 3 — the cinematic scrubber.
+ * PHASE 5 — the editorial overlay.
  *
- * The DOM is almost empty on purpose: the track exists to BE scroll distance,
- * and everything visual lives on the WebGL canvas behind it.
+ * Luxury breathes: every section is a full viewport or 32-unit padding, no
+ * section is dense, and nothing here has a corner radius or a shadow.
+ * mix-blend-difference lets the type invert itself against whatever the WebGL
+ * canvas is doing behind it, so it stays legible over both the indigo void and
+ * the bright cream shawls without a line of colour-tracking JS.
  */
 export default function Home() {
   return (
     <>
       <SequenceLoader />
+
       <main>
-        {/* ---- MORPH ZONE ----
-            150vh that belongs to the particles alone. The scrubber's
-            ScrollTrigger is anchored to #scrub-track, so the footage cannot
-            begin until this has been scrolled past. */}
-        <section
-          style={{
-            height: "150vh",
-            display: "flex",
-            alignItems: "center",
-            padding: "0 clamp(1rem, 5vw, 5rem)",
-            pointerEvents: "none",
-          }}
-        >
-          <div style={{ position: "sticky", top: "38vh" }}>
+        {/* ---------- MORPH ZONE: the particles own this 150vh ---------- */}
+        <section className="flex h-[150vh] items-center px-[clamp(1.25rem,5vw,6rem)]">
+          <div className="sticky top-[34vh]">
             <p
+              className="t-micro-ed"
               style={{
-                fontFamily: "var(--font-geist-mono)",
-                fontSize: "clamp(10px,1vw,12px)",
-                letterSpacing: "0.28em",
                 color: "#E8BC57",
+                letterSpacing: "var(--tracking-luxe-widest)",
+                marginBottom: "clamp(1.5rem,3vw,2.5rem)",
               }}
             >
-              शैली ०१ · मिथिला
+              शैली ०१ — Mithila
             </p>
-            <h1
-              style={{
-                fontFamily: "var(--font-display-serif)",
-                fontWeight: 300,
-                fontSize: "clamp(2.8rem, 9vw, 7.5rem)",
-                lineHeight: 0.92,
-                letterSpacing: "-0.04em",
-                color: "#F7F3EC",
-                margin: "0.3em 0 0",
-                mixBlendMode: "difference",
-              }}
-            >
-              The dust
-              <br />
-              remembers
-              <br />
-              the drawing
-            </h1>
+
+            {/* difference inverts the glyphs against whatever the canvas is
+                rendering behind them, so this stays legible over the indigo
+                void AND over the bright cream shawls with no colour-tracking
+                JS at all. */}
+            <CinematicText
+              as="h1"
+              text="The dust remembers the drawing"
+              className="t-hero-ed max-w-[14ch]"
+              style={{ color: "#FFFFFF", mixBlendMode: "difference" }}
+            />
+
+            <div className="mt-[clamp(2rem,4vw,3.5rem)] max-w-[44ch]">
+              <CinematicText
+                as="p"
+                text="Hand-painted in Mithila, embroidered in Kashmir, stitched in Lucknow. Every piece exists once."
+                className="t-body-ed"
+                style={{ color: "#FFFFFF", mixBlendMode: "difference" }}
+                delay={0.35}
+                stagger={0.022}
+              />
+            </div>
           </div>
         </section>
 
+        {/* ---------- the cinematic scrubber ---------- */}
         <ScrubTrack />
+
+        {/* ---------- editorial close ---------- */}
         <section
-          style={{
-            minHeight: "60svh",
-            display: "grid",
-            placeItems: "center",
-            padding: "6rem 1.5rem",
-          }}
+          id="craft"
+          className="flex min-h-screen items-center justify-center px-[clamp(1.25rem,5vw,6rem)] py-32"
         >
-          <p
-            style={{
-              fontFamily: "var(--font-display-serif)",
-              fontStyle: "italic",
-              fontSize: "clamp(1.2rem,2.4vw,2rem)",
-              color: "#F7F3EC",
-              opacity: 0.7,
-              textAlign: "center",
-              maxWidth: "30ch",
-            }}
-          >
-            Five pieces. Each made once, by one pair of hands.
-          </p>
+          <div className="max-w-[52ch] text-center">
+            <p
+              className="t-micro-ed"
+              style={{ color: "#E8BC57", letterSpacing: "var(--tracking-luxe-widest)" }}
+            >
+              The Craft
+            </p>
+            <div className="mt-[clamp(2rem,4vw,3rem)]">
+              <CinematicText
+                as="h2"
+                text="Nothing here was made twice"
+                className="t-display-ed"
+                style={{ color: "#FFFFFF", mixBlendMode: "difference" }}
+              />
+            </div>
+            <div className="mt-[clamp(2rem,4vw,3rem)]">
+              <CinematicText
+                as="p"
+                text="A sozni shawl can hold a year of one person's hands. A kani weave advances one pass at a time against a coded talim. We do not restock, because the next piece will be different."
+                className="t-body-ed"
+                style={{ color: "#FFFFFF", opacity: 0.75, mixBlendMode: "difference" }}
+                delay={0.2}
+                stagger={0.018}
+              />
+            </div>
+          </div>
         </section>
       </main>
     </>

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Inter, Geist_Mono } from "next/font/google";
+import { Cormorant_Garamond, Jost, Geist_Mono } from "next/font/google";
 import { SmoothScroll } from "@/components/layout/smooth-scroll";
 import { GlobalCanvas } from "@/components/canvas/global-canvas";
+import { Overlay } from "@/components/dom/Overlay";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -11,7 +12,16 @@ const display = Cormorant_Garamond({
   display: "swap",
 });
 
-const inter = Inter({ variable: "--font-inter", subsets: ["latin"], display: "swap" });
+/* Jost replaces Inter entirely. Inter is a UI face — excellent at it, and
+   exactly why it reads as software rather than as an editorial page. Jost is
+   geometric and takes wide tracking without falling apart, which is the whole
+   trick with uppercase luxury micro-type. */
+const body = Jost({
+  variable: "--font-body",
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  display: "swap",
+});
 const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], display: "swap" });
 
 const SITE = "https://thepinkestore.com";
@@ -31,7 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en-IN"
-      className={`${display.variable} ${inter.variable} ${mono.variable}`}
+      className={`${display.variable} ${body.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
       {/*
@@ -50,6 +60,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           you write. Body styling lives in globals.css instead. */}
       <body>
         <GlobalCanvas />
+        <Overlay />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
