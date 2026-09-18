@@ -750,3 +750,15 @@
   .measure-read { max-width: 62ch; }
   .measure-lede { max-width: 46ch; }
 }
+
+/* =========================================================================
+   The UA's own search-clear control renders as a blue system X, which is the
+   one piece of Chrome's visual language that ever appears on this site. The
+   field is display type in a modal; Escape and select-all are the real ways
+   out of it.
+   ========================================================================= */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
@@ -9,7 +9,10 @@ import { Wordmark } from "@/components/brand/Monogram";
 import { BagButton } from "./BagButton";
 import { UtilityBar } from "./UtilityBar";
 import { MobileNav } from "./MobileNav";
+import { SearchOverlay, useSearchHotkey } from "./SearchOverlay";
+import { MegaPanel, useMegaMenu, type MenuKey } from "./MegaMenu";
 import { useScrollState } from "./useScrollState";
+import { AnimatePresence } from "motion/react";
 
 /**
  * THE HEADER. One component, every route except the cinematic intro.
@@ -29,9 +32,9 @@ const SETTLE = { type: "spring", stiffness: 260, damping: 34, mass: 0.9 } as con
 
 /* The desktop bar shows destinations, not group labels: "The Collection"
    is somewhere you can go, "Shop" is a category of somewhere. */
-const PRIMARY = [
-  { label: "Collection", href: "/collection" },
-  { label: "The Craft", href: "/craft" },
+const PRIMARY: { label: string; href: string; menu?: MenuKey }[] = [
+  { label: "Collection", href: "/collection", menu: "collection" },
+  { label: "The Craft", href: "/craft", menu: "craft" },
   { label: "Journal", href: "/journal" },
   { label: "About", href: "/about" },
 ];
@@ -40,7 +43,19 @@ export function SiteHeader() {
   const scrolled = useScrollState();
   const reduced = useReducedMotion();
   const [menu, setMenu] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const mega = useMegaMenu();
   const pathname = usePathname();
+
+  useSearchHotkey(() => setSearching(true));
+
+  /* A panel left open across a route change hangs over the new page. */
+  useEffect(() => {
+    mega.closeNow();
+    setMenu(false);
+    setSearching(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   const isCurrent = (href: string) =>
     href === pathname || (href !== "/" && pathname.startsWith(`${href}/`));
@@ -64,6 +79,7 @@ export function SiteHeader() {
           }
           transition={SETTLE}
           style={{
+            position: "relative",
             borderBottomWidth: 1,
             borderBottomStyle: "solid",
             /* backdrop-filter, unlike filter, does NOT create a containing
@@ -90,17 +106,23 @@ export function SiteHeader() {
             <nav aria-label="Main" className="hidden items-center gap-9 lg:flex">
               {PRIMARY.map((n) => {
                 const on = isCurrent(n.href);
+                const expanded = mega.openKey === n.menu;
                 return (
                   <Link
                     key={n.href}
                     href={n.href}
                     aria-current={on ? "page" : undefined}
+                    aria-expanded={n.menu ? expanded : undefined}
+                    aria-haspopup={n.menu ? "true" : undefined}
+                    onPointerEnter={() => (n.menu ? mega.open(n.menu) : mega.close())}
+                    onPointerLeave={() => n.menu && mega.close()}
+                    onFocus={() => (n.menu ? mega.toggle(n.menu) : mega.closeNow())}
                     className="ty-mono"
                     style={{
                       color: "#1A1A1A",
                       textDecoration: "none",
-                      opacity: on ? 1 : 0.62,
-                      borderBottom: `1px solid ${on ? "#96605B" : "transparent"}`,
+                      opacity: on || expanded ? 1 : 0.62,
+                      borderBottom: `1px solid ${on || expanded ? "#96605B" : "transparent"}`,
                       paddingBottom: 3,
                     }}
                   >
@@ -111,6 +133,16 @@ export function SiteHeader() {
             </nav>
 
             <div className="flex items-center gap-6">
+              <button
+                type="button"
+                onClick={() => setSearching(true)}
+                aria-label="Search"
+                className="ty-mono"
+                style={{ color: "#1A1A1A", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+              >
+                Search
+              </button>
+
               <BagButton tone="#1A1A1A" />
 
               {/* DEDICATED MOBILE HEADER (item 19): below lg the nav collapses
@@ -128,10 +160,23 @@ export function SiteHeader() {
               </button>
             </div>
           </motion.div>
+
+          <AnimatePresence>
+            {mega.openKey && (
+              <MegaPanel
+                key={mega.openKey}
+                which={mega.openKey}
+                onNavigate={mega.closeNow}
+                onPointerEnter={mega.cancel}
+                onPointerLeave={mega.close}
+              />
+            )}
+          </AnimatePresence>
         </motion.header>
       </div>
 
-      <MobileNav open={menu} onClose={() => setMenu(false)} />
+      <MobileNav open={menu} onClose={() => setMenu(false)} onSearch={() => setSearching(true)} />
+      <SearchOverlay open={searching} onClose={() => setSearching(false)} />
     </>
   );
 }

@@ -23,7 +23,15 @@ import { ThreadRule } from "@/components/brand/ThreadRule";
 const PANEL = { type: "spring", stiffness: 260, damping: 32, mass: 0.9 } as const;
 const ROW = { type: "spring", stiffness: 300, damping: 30 } as const;
 
-export function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function MobileNav({
+  open,
+  onClose,
+  onSearch,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSearch?: () => void;
+}) {
   const reduced = useReducedMotion();
 
   /* Escape closes, and the page behind must not scroll under the panel. */
@@ -56,9 +64,26 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
           {/* sticky: the list is fourteen destinations tall, and a Close that
               scrolls away leaves the only exit off-screen. */}
           <div
-            className="sticky top-0 z-10 flex items-center justify-end px-[clamp(1rem,4vw,2rem)] py-5"
+            className="sticky top-0 z-10 flex items-center justify-between px-[clamp(1rem,4vw,2rem)] py-5"
             style={{ background: "#FAF8F5" }}
           >
+            {/* On a phone this panel IS the navigation, so search has to live
+                inside it — there is no header row left to put it in. */}
+            {onSearch ? (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onSearch();
+                }}
+                className="ty-mono"
+                style={{ color: "#1A1A1A", background: "none", border: "none", padding: "0.4rem 0", cursor: "pointer" }}
+              >
+                Search
+              </button>
+            ) : (
+              <span />
+            )}
             <button
               type="button"
               onClick={onClose}
