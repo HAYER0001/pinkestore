@@ -7,6 +7,12 @@ link to them; photography must exist before a gallery can show it.
 **Legend**
 `◑` partially built already · `⛔` blocked on something only you can supply
 
+**Coverage note.** The first draft of this roadmap assigned only 81 of the 100
+items to a phase; 19 were silently dropped. They are folded in now — CTAs into
+the hero phase, the product-fact items into Phase 13 where they were always
+going to live, the touch and gallery items into the product and mobile phases.
+Item 93 (menus as editorial overlays) landed in Phase 5.
+
 ---
 
 ## FOUNDATION — phases 1–4
@@ -52,14 +58,14 @@ Collection mega-menu, browse-by-craft, full-screen search overlay.
 *Effort: M*
 
 ### Phase 6 · Cinematic hero
-**Items 21, 22, 23, 24, 28, 29, 30**
+**Items 21, 22, 23, 24, 26, 27, 28, 29, 30**
 The Veo footage already extracted (144 frames) becomes the hero film. Adds
 foreground/background staging, scroll-progress indicator, the descending
 thread, and a hero piece emerging as a physical object.
 *Effort: L*
 
 ### Phase 7 · Narrative spine
-**Items 31, 38, 40**
+**Items 31, 38, 40, 87, 89**
 Restructure the homepage as `Origin → Craft → Hands → Object → Collection →
 Proof → Purchase`, with chapter numerals and a real closing statement.
 *Effort: M*
@@ -82,13 +88,13 @@ single biggest differentiator available — no competitor names a human maker.
 ## COMMERCE — phases 10–13
 
 ### Phase 10 · Editorial collection
-**Items 41 ◑, 42, 43 ⛔, 44 ◑, 47, 48, 49, 50**
+**Items 41 ◑, 42, 43 ⛔, 44 ◑, 45, 46, 47, 48, 49, 50**
 Larger imagery, price hierarchy, prominent location, "View piece", quick-view.
 **⛔ Item 43 (hover image transition) needs a second image per product.**
 *Effort: M*
 
 ### Phase 11 · Product page depth
-**Items 51 ◑, 52, 54, 55, 56, 57, 59, 60**
+**Items 51 ◑, 52, 54, 55, 56, 57, 58, 59, 60, 90, 91, 92**
 Vertical immersive gallery, zoom, fullscreen mode, "Enquire privately" (essential
 at ₹42k–₹65k), sticky mobile purchase bar.
 *Effort: L*
@@ -102,7 +108,7 @@ Until this exists, phases 10 and 11 ship at half strength.
 *Effort: L — a shoot, not code*
 
 ### Phase 13 · Product data ⛔
-**Items 61–70**
+**Items 61, 62, 63, 64, 65, 66, 67, 68, 69, 70**
 16 `NEEDS_REAL_DATA` fields today. Dimensions, composition, weight, care,
 provenance, making time, dispatch, certificates, returns accordion.
 Fields render nothing rather than a placeholder, so pages simply omit them.
@@ -119,7 +125,7 @@ purchase flow. **⛔ Item 10 is stronger with real packaging photography.**
 *Effort: S*
 
 ### Phase 15 · Page transitions
-**Items 71, 74, 75, 76 ◑**
+**Items 71, 74, 75, 76 ◑, 94**
 Route transitions, animated section numerals, masked image reveals.
 *Effort: M*
 
