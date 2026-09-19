@@ -776,7 +776,9 @@ input[type="search"]::-webkit-search-decoration {
    two real destinations on screen, and of the pair it is the one nobody came
    for.
    ========================================================================= */
-@media (max-height: 820px) {
+@media (max-height: 820px), (max-width: 1023px) {
+  /* and on any phone: the type block is anchored to the frame's foot, so the
+     centred cue always lands in it, and a thumb does not need telling */
   [data-scroll-cue] { display: none; }
 }
 
@@ -874,4 +876,60 @@ input[type="search"]::-webkit-search-decoration {
   .tap-row {
     gap: max(1.5rem, var(--tap-gap, 1.5rem));
   }
+}
+
+/* =========================================================================
+   THE REDESIGN — chapter grounds and the monument type step.
+
+   Four chapters, four atmospheres. These are surfaces, not brand colours: each
+   is sampled to sit UNDER the chapter's own photograph, so the image and the
+   ground read as one material rather than as a picture on a wall.
+   ========================================================================= */
+:root {
+  --ch-mithila-ground: #F4EDE2;   /* warm ivory — the shawl's own field */
+  --ch-mithila-ink: #2A211B;
+  --ch-mithila-accent: #B5533C;   /* terracotta */
+
+  --ch-kashmir-ground: #F2F1EE;   /* cool ivory */
+  --ch-kashmir-ink: #23252A;
+  --ch-kashmir-accent: #9A968E;   /* soft stone */
+
+  --ch-jamawar-ground: #151A33;   /* deep indigo */
+  --ch-jamawar-ink: #F2EFE8;
+  --ch-jamawar-accent: #8C93B8;
+
+  --ch-kairi-ground: #0F0E0C;     /* black */
+  --ch-kairi-ink: #F3EDE9;
+  --ch-kairi-accent: #C9A59F;     /* muted pink */
+}
+
+@theme {
+  /* 8–12vw. Above --text-colossal; for one or two words that ARE the section. */
+  --text-monument: clamp(4rem, 12vw, 15rem);
+  --text-wall: clamp(3rem, 8.5vw, 10rem);
+}
+
+@layer utilities {
+  .ty-monument {
+    font-family: var(--font-display);
+    font-size: var(--text-monument);
+    font-weight: 300;
+    line-height: 0.8;
+    letter-spacing: -0.055em;
+  }
+  .ty-wall {
+    font-family: var(--font-display);
+    font-size: var(--text-wall);
+    font-weight: 300;
+    line-height: 0.86;
+    letter-spacing: -0.045em;
+  }
+  /* Type may sit ACROSS a photograph's edge — it needs to paint above it.
+     z-index ONLY. This rule sits at the end of the sheet, so a `position`
+     here would out-cascade Tailwind's `absolute` on the same element — which
+     is exactly what happened: the hero headline became a relative element
+     nudged up by `bottom: 14vh` instead of one anchored to the frame's foot,
+     and clipped off the top of the viewport. Positioning stays the element's
+     own business. */
+  .over-image { z-index: 2; }
 }

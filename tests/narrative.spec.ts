@@ -23,13 +23,16 @@ test("the chapters run in narrative order, not shop-first", async ({ page }) => 
   await settle(page);
 
   const order = await page.evaluate(() =>
-    [...document.querySelectorAll("#origin,#scrub-track,#craft,#pieces,#promise")]
+    [...document.querySelectorAll("#origin,#scrub-track,#mithila,#kashmir,#jamawar,#kairi,#pieces,#promise")]
       .map((e) => ({ id: e.id, top: e.getBoundingClientRect().top + window.scrollY }))
       .sort((a, b) => a.top - b.top)
       .map((x) => x.id),
   );
 
-  expect(order).toEqual(["origin", "scrub-track", "craft", "pieces", "promise"]);
+  /* the four craft chapters sit between the film and the wall; the making
+     (#craft, now the exhibition wall) comes after the pieces and is not a
+     rail stop */
+  expect(order).toEqual(["origin", "scrub-track", "mithila", "kashmir", "jamawar", "kairi", "pieces", "promise"]);
 });
 
 test("the rail tracks every chapter and each one exists", async ({ page }) => {
@@ -38,10 +41,10 @@ test("the rail tracks every chapter and each one exists", async ({ page }) => {
   await settle(page);
 
   const rail = page.locator('nav[aria-label="Chapters"]');
-  await expect(rail.locator("li")).toHaveCount(5);
+  await expect(rail.locator("li")).toHaveCount(8);
 
   const missing = await page.evaluate(() =>
-    ["origin", "scrub-track", "craft", "pieces", "promise"].filter((id) => !document.getElementById(id)),
+    ["origin", "scrub-track", "mithila", "kashmir", "jamawar", "kairi", "pieces", "promise"].filter((id) => !document.getElementById(id)),
   );
   expect(missing).toEqual([]);
 });
@@ -53,8 +56,10 @@ test("the page ends on a statement, not on the shop", async ({ page }) => {
   await page.waitForTimeout(1800);
 
   const closing = page.locator("main section").last();
-  await expect(closing).toContainText("What you are buying");
-  await expect(closing).toContainText("is someone's winter");
+  /* "someone's winter" moved onto the exhibition wall; the page now ends on
+     the truest sentence on the site, at the monument step */
+  await expect(closing).toContainText("Nothing here");
+  await expect(closing).toContainText("was made twice");
 
   /* and it offers somewhere to go rather than stopping dead */
   await expect(closing.locator('a[href="/collection"]')).toHaveCount(1);
@@ -72,7 +77,7 @@ test("the closing headline is two lines, not four", async ({ page }) => {
      76px headline was ~368px wide and wrapped it to four lines. */
   const lines = await page.evaluate(() => {
     const h = [...document.querySelectorAll("main section")].pop()!.querySelector("h2")!;
-    return [...h.querySelectorAll("span > span > span")].map((s) => {
+    return [...h.querySelectorAll("span[aria-hidden] > span > span")].map((s) => {
       const r = s.getBoundingClientRect();
       return { t: (s as HTMLElement).innerText, h: Math.round(r.height) };
     });

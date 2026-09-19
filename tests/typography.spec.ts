@@ -147,11 +147,11 @@ test.describe("chapter numerals as navigation", () => {
 
     const rail = page.locator('nav[aria-label="Chapters"]');
     await expect(rail).toBeVisible();
-    await expect(rail.locator("li")).toHaveCount(5);
+    await expect(rail.locator("li")).toHaveCount(8);
 
     /* every numeral must resolve to a section that actually exists */
     const missing = await page.evaluate(() =>
-      ["origin", "scrub-track", "craft", "pieces", "promise"].filter(
+      ["origin", "scrub-track", "mithila", "kashmir", "jamawar", "kairi", "pieces", "promise"].filter(
         (id) => !document.getElementById(id),
       ),
     );
@@ -159,14 +159,14 @@ test.describe("chapter numerals as navigation", () => {
 
     await expect(rail.locator('[aria-current="true"]')).toHaveCount(1);
 
-    /* Phase 7 reordered the spine: The Making moved ahead of the shop, so
-       craft is chapter 03 and the shop is 04. */
+    /* The redesign's spine: Origin, The Cloth, then the four craft chapters,
+       so Jamawar is the fifth stop. */
     const y = await page.evaluate(
-      () => document.getElementById("craft")!.getBoundingClientRect().top + window.scrollY,
+      () => document.getElementById("jamawar")!.getBoundingClientRect().top + window.scrollY + 200,
     );
     await lenisTo(page, y);
     await settle(page, 1200);
-    await expect(rail.locator('[aria-current="true"]')).toContainText("03");
+    await expect(rail.locator('[aria-current="true"]')).toContainText("05");
   });
 
   test("the rail never prints through the hero", async ({ page }) => {

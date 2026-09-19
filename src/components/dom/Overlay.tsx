@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ScrollIndicator } from "./ScrollIndicator";
 import { scrollToId } from "@/utils/animations/scroll-to";
 import { useChromeTone } from "./useChromeTone";
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { canvasStore } from "@/utils/animations/canvas-store";
 import { SoundController } from "./SoundController";
 import { Magnet } from "./Magnet";
@@ -56,7 +56,27 @@ export function Overlay() {
     canvasStore.getActive,
     () => true,
   );
-  const intro = cinematic && introActive;
+  /* The cue is a HERO instruction, not a canvas one. Gating it on the canvas
+     being alive kept "Scroll to explore" printing across the film, the portal
+     and four chapters — 1,300px into a page the reader was already exploring.
+     It retires as soon as the hero's sticky frame has scrolled off. Position
+     is read from a rAF-coalesced scroll listener, not IntersectionObserver —
+     see useReveal for why. */
+  const [heroOnScreen, setHeroOnScreen] = useState(true);
+  useEffect(() => {
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const hero = document.getElementById("origin");
+      setHeroOnScreen(!hero || hero.getBoundingClientRect().bottom > window.innerHeight * 0.9);
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(read); };
+    read();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); if (raf) cancelAnimationFrame(raf); };
+  }, []);
+
+  const intro = cinematic && introActive && heroOnScreen;
 
   /* The whole overlay is cinematic furniture. Commerce routes render
      SiteHeader in normal flow, and leaving this fixed layer mounted on top

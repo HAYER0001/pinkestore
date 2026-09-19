@@ -53,15 +53,14 @@ test.describe("calls to action", () => {
     expect(page.url()).toContain("/collection");
   });
 
-  test("the hero surfaces a piece that can be bought", async ({ page }) => {
+  test("the hero is one scene: a single photograph, not a product column", async ({ page }) => {
     await page.setViewportSize({ width: 1600, height: 950 });
     await page.goto("/");
     await settle(page);
-
-    const link = page.locator('#origin a[href^="/product/"]').first();
-    await expect(link).toBeVisible();
-    const href = await link.getAttribute("href");
-    expect((await page.request.get(href!)).status()).toBe(200);
+    /* the redesign replaced the type-left / cloth-right spread with one
+       full-viewport painting the headline crosses — so exactly one image */
+    expect(await page.locator("#origin img").count()).toBe(1);
+    expect(await page.locator('#origin a[href^="/product/"]').count()).toBe(0);
   });
 });
 
