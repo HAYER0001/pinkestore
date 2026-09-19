@@ -153,4 +153,4 @@ export function sequenceSrc(i: number, lowRes: boolean) {
   return `/sequence/${dir}/f${String(i + 1).padStart(3, "0")}.webp`;
 }
 
-export const FRAME_COUNT = 144;
+export const FRAME_COUNT = 115; /* was 144 — f087-f115, the chikankari clip, cut out */

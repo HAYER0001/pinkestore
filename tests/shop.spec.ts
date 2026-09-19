@@ -74,7 +74,7 @@ test("grid is asymmetric, square-cornered and shadowless", async ({ page }) => {
   });
 
   expect(cards).not.toBeNull();
-  expect(cards!.length).toBe(5);
+  expect(cards!.length).toBe(4);
 
   for (const c of cards!) {
     expect(c.radius, "luxury is sharp — no rounded corners").toBe("0px");
@@ -95,7 +95,7 @@ test("grid is asymmetric, square-cornered and shadowless", async ({ page }) => {
   }
 });
 
-test("all five images load", async ({ page }) => {
+test("all four images load", async ({ page }) => {
   await page.goto("/");
   await page.waitForTimeout(3000);
   await toShop(page);
@@ -108,7 +108,7 @@ test("all five images load", async ({ page }) => {
     })),
   );
 
-  expect(imgs.length).toBe(5);
+  expect(imgs.length).toBe(4);
   for (const i of imgs) {
     expect(i.complete).toBe(true);
     expect(i.w, "an image failed to decode").toBeGreaterThan(0);

@@ -8,7 +8,7 @@ const DOC = POLICIES.care;
 
 export const metadata = policyMetadata(
   DOC,
-  "How to keep hand-painted, sozni, kani, chikankari and printed textiles — care by technique, not by guesswork.",
+  "How to keep hand-painted, sozni, kani and printed textiles — care by technique, not by guesswork.",
 );
 
 export default function Page() {

@@ -119,7 +119,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 type="search"
-                placeholder="Pashmina, chikankari, Kashmir…"
+                placeholder="Pashmina, kani, Kashmir…"
                 aria-label="Search pieces, crafts and pages"
                 className="ty-display w-full"
                 style={{

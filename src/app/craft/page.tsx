@@ -9,7 +9,7 @@ import { PlaceConstellation } from "@/components/craft/PlaceConstellation";
 export const metadata: Metadata = {
   title: "The Craft",
   description:
-    "Five techniques, four regions: hand-painted Madhubani from Mithila, sozni and jamawar kani from Kashmir, chikankari from Lucknow, and printed kairi.",
+    "Four techniques, three regions: hand-painted Madhubani from Mithila, sozni and jamawar kani from Kashmir, and printed kairi.",
 };
 
 /**
@@ -27,7 +27,7 @@ export default function CraftIndexPage() {
   return (
     <PageShell
       eyebrow="The Craft"
-      display={["Five techniques,", "four regions"]}
+      display={["Four techniques,", "three regions"]}
       standfirst={`${spell(handmade, true)} of the ${spell(entries.length)} are made entirely by hand, one is printed, and this page says which is which. Mithila painting is the look of this website; it is not the look of most of what we sell.`}
       trail={[{ label: "Home", href: "/" }, { label: "The Craft" }]}
     >

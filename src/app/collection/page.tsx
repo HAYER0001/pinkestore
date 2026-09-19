@@ -13,13 +13,12 @@ import { CollectionGrid } from "@/components/ecommerce/CollectionGrid";
 export const metadata: Metadata = {
   title: "The Collection",
   description:
-    "Every piece currently held: hand-painted Madhubani, Kashmiri sozni and jamawar kani, Lucknowi chikankari, printed kairi. Each one one-of-one unless stated.",
+    "Every piece currently held: hand-painted Madhubani, Kashmiri sozni and jamawar kani, printed kairi. Each one one-of-one unless stated.",
 };
 
 const CATEGORIES: { value: Category | "all"; label: string }[] = [
   { value: "all", label: "Everything" },
   { value: "shawl", label: "Shawls" },
-  { value: "suit-set", label: "Suit sets" },
 ];
 
 export default async function CollectionPage(props: PageProps<"/collection">) {

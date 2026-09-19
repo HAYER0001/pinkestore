@@ -94,8 +94,8 @@ export default function Home() {
               style={{ mixBlendMode: "difference" }}
               delay={0.35}
             >
-              Hand-painted in Mithila, embroidered in Kashmir, stitched in
-              Lucknow. Every piece exists once.
+              Hand-painted in Mithila, embroidered and woven in Kashmir.
+              Every piece exists once.
             </Standfirst>
 
             {/* The homepage had NO call to action at all. Someone could read

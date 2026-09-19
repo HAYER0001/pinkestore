@@ -71,7 +71,7 @@ test("repeated actions are told apart by name", async ({ page }) => {
   /* The homepage carries two of these per piece — one on the film, one in the
      bento grid — and both correctly say the same thing, because both do the
      same thing to the same shawl. What must never happen again is a bare
-     "Add to bag" repeated five times with nothing to tell them apart. */
+     "Add to bag" repeated four times with nothing to tell them apart. */
   expect(names.length).toBeGreaterThanOrEqual(PRODUCTS.length);
 
   for (const n of names) {

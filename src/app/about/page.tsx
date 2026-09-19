@@ -10,7 +10,7 @@ const DOC = POLICIES.about;
 
 export const metadata = policyMetadata(
   DOC,
-  "A small shop in Chandigarh selling one-of-one handmade textiles from Mithila, Kashmir and Lucknow.",
+  "A small shop in Chandigarh selling one-of-one handmade textiles from Mithila and Kashmir.",
 );
 
 export default function Page() {

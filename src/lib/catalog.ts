@@ -2,7 +2,8 @@
  * THE PINKESTORE — canonical product truth.
  *
  * RULE: Mithila/Madhubani is the SITE's visual identity. It is NOT the product
- * line. Exactly one piece in this catalogue is Madhubani. Never describe any
+ * line. Exactly one piece in this catalogue is Madhubani. (Four pieces since
+ * the chikankari suit set was withdrawn at the owner's request.) Never describe any
  * other piece as Madhubani, Mithila, or "folk-painted" — each craft is named
  * accurately below. The house ornament must never be placed so that it reads
  * as part of a product's own decoration.
@@ -23,10 +24,11 @@ export type Craft =
   | "madhubani-hand-painted"
   | "sozni-hand-embroidered"
   | "jamawar-kani"
-  | "kairi-print"
-  | "lucknowi-chikankari";
+  | "kairi-print";
 
-export type Category = "shawl" | "suit-set";
+/* Shawls only since the chikankari suit set was withdrawn. Kept as a union so
+   a second category can return without touching every call site. */
+export type Category = "shawl";
 
 export interface CraftMeta {
   label: string;
@@ -63,13 +65,6 @@ export const CRAFTS: Record<Craft, CraftMeta> = {
     technique:
       "A dense all-over kairi (paisley) print on a black ground, finished with a multi-stripe border.",
     handmade: false,
-  },
-  "lucknowi-chikankari": {
-    label: "Lucknowi chikankari",
-    region: "Lucknow, Uttar Pradesh",
-    technique:
-      "White floss shadow-work on cotton, accented with mukaish and pearl, worked entirely by hand.",
-    handmade: true,
   },
 };
 
@@ -187,26 +182,6 @@ export const PRODUCTS: Product[] = [
     provenance: {
       madeIn: "India",
       dimensions: "NEEDS_REAL_DATA — measure in cm",
-      fabric: "NEEDS_REAL_DATA",
-    },
-  },
-  {
-    slug: "chikankari-blush-suit-set",
-    name: "Chikankari Blush",
-    nameLocal: { text: "चिकनकारी", lang: "hi" },
-    craft: "lucknowi-chikankari",
-    category: "suit-set",
-    image: "/products/chikankari-blush-suit-set.jpeg",
-    width: 720,
-    height: 1280,
-    blurb:
-      "White floss on blush cotton, with pearl and mukaish catching the light along the yoke. Kurta with matching dupatta.",
-    pricePaise: 890_000,
-    stock: 2,
-    provenance: {
-      madeIn: "Lucknow, Uttar Pradesh",
-      makingTime: "NEEDS_REAL_DATA — embroidery hours",
-      dimensions: "NEEDS_REAL_DATA — kurta + dupatta",
       fabric: "NEEDS_REAL_DATA",
     },
   },

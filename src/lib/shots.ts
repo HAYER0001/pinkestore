@@ -87,7 +87,7 @@ export const getShots = (slug: string): Shot[] => SHOTS[slug] ?? [];
 
 /**
  * The hero frame, falling back to the catalogue's single original photograph
- * for any piece we have not shot yet. Chikankari is still on one image.
+ * for any piece we have not shot yet.
  */
 export function heroImage(p: Product): { src: string; width: number; height: number } {
   const shots = getShots(p.slug);

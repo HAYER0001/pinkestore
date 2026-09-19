@@ -148,10 +148,9 @@ test.describe("the catalogue pages are real", () => {
     const all = await page.locator('a[href^="/product/"]').count();
     expect(all).toBeGreaterThanOrEqual(5);
 
-    await page.goto("/collection?category=suit-set");
-    const filtered = await page.locator('a[href^="/product/"]').count();
-    expect(filtered).toBeGreaterThan(0);
-    expect(filtered).toBeLessThan(all);
+    /* only one category exists now, so a real filter equals the whole set */
+    await page.goto("/collection?category=shawl");
+    expect(await page.locator('a[href^="/product/"]').count()).toBe(all);
 
     /* An unknown filter shows everything rather than an empty shop. */
     await page.goto("/collection?category=nonsense");

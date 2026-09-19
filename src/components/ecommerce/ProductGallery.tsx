@@ -18,16 +18,14 @@ import { VelocityDistort } from "@/components/dom/VelocityDistort";
  *  cols 1-7,  rows 1-2   Jamawar Indigo    hero, double height
  *  cols 8-12, row  1     Baraat Shawl      the narrative piece
  *  cols 8-12, row  2     Sozni Ivory       light, tight
- *  cols 1-4,  row  3     Kairi Noir        smallest: printed, not handworked
- *  cols 5-12, row  3     Chikankari Blush  wide closer
+ *  cols 1-12, row  3     Kairi Noir        printed, not handworked
  */
 
 const AREAS: Record<string, string> = {
   "jamawar-indigo-kani-shawl": "1 / 1 / 3 / 8",
   "madhubani-baraat-shawl": "1 / 8 / 2 / 13",
   "sozni-ivory-pashmina": "2 / 8 / 3 / 13",
-  "kairi-noir-paisley-shawl": "3 / 1 / 4 / 5",
-  "chikankari-blush-suit-set": "3 / 5 / 4 / 13",
+  "kairi-noir-paisley-shawl": "3 / 1 / 4 / 13",
 };
 
 const ORDER = [
@@ -35,7 +33,6 @@ const ORDER = [
   "madhubani-baraat-shawl",
   "sozni-ivory-pashmina",
   "kairi-noir-paisley-shawl",
-  "chikankari-blush-suit-set",
 ];
 
 export function ProductGallery() {
@@ -99,7 +96,7 @@ export function ProductGallery() {
                 color: "#1A1A1A",
               }}
             >
-              Five pieces, five hands
+              Four pieces, four hands
             </h2>
           </div>
 

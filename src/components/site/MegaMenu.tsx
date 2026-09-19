@@ -135,8 +135,6 @@ export function MegaPanel({
               <ul className="mt-5 space-y-3" style={{ margin: "1.25rem 0 0", padding: 0, listStyle: "none" }}>
                 {[
                   { label: "Everything", href: "/collection", n: PRODUCTS.length },
-                  { label: "Shawls", href: "/collection?category=shawl", n: PRODUCTS.filter((p) => p.category === "shawl").length },
-                  { label: "Suit sets", href: "/collection?category=suit-set", n: PRODUCTS.filter((p) => p.category === "suit-set").length },
                 ].map((l) => (
                   <li key={l.href}>
                     <Link href={l.href} onClick={onNavigate} className="ty-title" style={{ color: "#1A1A1A", textDecoration: "none" }}>

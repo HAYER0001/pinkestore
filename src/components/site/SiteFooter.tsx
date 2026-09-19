@@ -54,8 +54,8 @@ export function SiteFooter() {
 
             <p className="ty-read measure-read mt-5" style={{ color: "#4A443C" }}>
               {spell(handmade, true)} of the {spell(PRODUCTS.length)} pieces we
-              hold are made entirely by hand, in Mithila, in Kashmir and in
-              Lucknow. The shop is in {BRAND.city}.
+              hold are made entirely by hand, in Mithila and in Kashmir. The
+              shop is in {BRAND.city}.
             </p>
 
             <a

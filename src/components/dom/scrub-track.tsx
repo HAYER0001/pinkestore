@@ -23,9 +23,10 @@ import { Magnet } from "./Magnet";
 const BEATS = [
   { at: 0.09, slug: "madhubani-baraat-shawl", k: "०१ · मिथिला", line: "Painted, not printed", sub: "No pencil underneath. No second attempt." },
   { at: 0.30, slug: "sozni-ivory-pashmina", k: "०२ · कश्मीर", line: "Months, not minutes", sub: "One sozni shawl can hold a year of someone's hands." },
-  { at: 0.52, slug: "jamawar-indigo-kani-shawl", k: "०३ · जामावार", line: "One pass at a time", sub: "Small wooden spools, a coded talim, no shortcut." },
-  { at: 0.73, slug: "chikankari-blush-suit-set", k: "०४ · लखनऊ", line: "White on blush", sub: "Shadow-work, worked from the reverse." },
-  { at: 0.92, slug: "kairi-noir-paisley-shawl", k: "०५", line: "Loud, worn quietly", sub: "A printed field of paisley on black." },
+  { at: 0.60, slug: "jamawar-indigo-kani-shawl", k: "०३ · जामावार", line: "One pass at a time", sub: "Small wooden spools, a coded talim, no shortcut." },
+  /* the chikankari clip (f087-f115 of the original 144) is cut from the
+     sequence; kairi now runs f087-f115 of 115, centre ~0.88 */
+  { at: 0.88, slug: "kairi-noir-paisley-shawl", k: "०४", line: "Loud, worn quietly", sub: "A printed field of paisley on black." },
 ];
 
 const WINDOW = 0.13;
@@ -161,8 +162,8 @@ export function ScrubTrack() {
 
                   <Magnet range={110}>
                     <button
-                      /* Five of these exist, one per beat. Without a distinct
-                         name a screen-reader user hears "Add to bag" five
+                      /* Four of these exist, one per beat. Without a distinct
+                         name a screen-reader user hears "Add to bag" four
                          times over with no way to tell which shawl is which. */
                       aria-label={`Add ${product.name} to bag`}
                       type="button"

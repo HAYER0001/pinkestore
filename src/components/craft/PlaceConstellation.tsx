@@ -11,7 +11,7 @@ import { useReveal } from "@/components/type/useReveal";
  * FROM PLACE TO PIECE (items 34 + 35).
  *
  * A diagram, not a map — see the note in lib/places.ts for why there is no
- * outline of India here. Four places at their true relative coordinates, three
+ * outline of India here. Three places at their true relative coordinates, two
  * of them origins and one of them the shop, joined by thread.
  *
  * The thread runs FROM each origin TO Chandigarh, which is the entire story
@@ -205,7 +205,7 @@ export function PlaceConstellation() {
                 the thread runs from where it was made to where it is sold, and
                 that distance is most of what you are paying for.
               </p>
-              {/* Four crafts are on the diagram and five exist. The printed one
+              {/* Three crafts are on the diagram and four exist. The printed one
                   is missing because we do not know where it was printed, and
                   that absence is itself the honest answer — a place invented
                   for it would be the only unsourced claim on this page. */}

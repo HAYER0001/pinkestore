@@ -37,12 +37,10 @@ const SYNONYMS: Record<string, string[]> = {
   "sozni-hand-embroidered": ["pashmina", "cashmere", "kashmiri", "embroidery", "needlework", "ivory", "white"],
   "jamawar-kani": ["kani", "jamawar", "handloom", "woven", "kashmiri", "indigo", "blue", "talim"],
   "kairi-print": ["paisley", "printed", "black", "budget", "affordable"],
-  "lucknowi-chikankari": ["chikan", "chikankari", "lucknow", "cotton", "suit", "salwar", "kurta", "white", "shadow work"],
 };
 
 const CATEGORY_WORDS: Record<string, string[]> = {
   shawl: ["shawl", "stole", "wrap", "dupatta", "scarf", "shal"],
-  "suit-set": ["suit", "suit set", "salwar", "kurta", "kameez", "set"],
 };
 
 function buildIndex(): SearchDoc[] {
@@ -136,7 +134,7 @@ export function search(query: string, limit = 8): Scored[] {
       else score += 3;
 
       /* a match at a word boundary is a real match; one inside a longer word
-         usually is not — "kani" inside "chikankari" should not win */
+         usually is not — a substring hit inside a longer word should not win */
       if (inBody > 0 && /[\s·—-]/.test(doc.haystack[inBody - 1])) score += 2;
     }
     return { ...doc, score: score + KIND_BIAS[doc.kind] };

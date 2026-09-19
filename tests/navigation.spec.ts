@@ -22,8 +22,6 @@ test.describe("search index", () => {
       ["mithila", "/product/madhubani-baraat-shawl"],
       ["folk painting", "/product/madhubani-baraat-shawl"],
       ["paisley", "/product/kairi-noir-paisley-shawl"],
-      ["salwar", "/product/chikankari-blush-suit-set"],
-      ["kurta", "/product/chikankari-blush-suit-set"],
       ["dupatta", "/product/"],
       ["kashmir", "/"],
     ];
@@ -36,17 +34,16 @@ test.describe("search index", () => {
 
   test("every token must match, so more words narrow", () => {
     const broad = search("kashmir");
-    const narrow = search("kashmir suit");
+    const narrow = search("kashmir painted");
     expect(broad.length).toBeGreaterThan(0);
-    /* the chikankari suit is from Lucknow, so this pair should not both hit */
+    /* the painted piece is from Mithila, so this pair should not both hit */
     expect(narrow.length).toBeLessThan(broad.length);
   });
 
   test("a match inside a longer word does not outrank a real one", () => {
-    /* "kani" appears inside "chikankari" */
-    const hits = search("kani");
-    expect(hits[0].title.toLowerCase()).toContain("kani");
-    expect(hits[0].title.toLowerCase()).not.toContain("chikankari");
+    /* "ivory" appears inside titles and bodies alike; the title hit must win */
+    const hits = search("ivory");
+    expect(hits[0].title.toLowerCase()).toContain("ivory");
   });
 
   test("the index covers every piece and every craft", () => {
@@ -167,7 +164,8 @@ test.describe("mega-menu", () => {
     await expect(panel).toBeVisible();
     /* a mega-menu that is only text links is a sitemap with a drop shadow */
     expect(await panel.locator("img").count()).toBeGreaterThanOrEqual(4);
-    await expect(panel).toContainText("Shawls");
+    /* shawls are the whole shop now, so the Browse column is one entry */
+    await expect(panel).toContainText("Everything");
   });
 
   test("The Craft opens browse-by-craft, and names the printed one there", async ({ page }) => {

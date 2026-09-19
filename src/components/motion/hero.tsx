@@ -37,7 +37,7 @@ const LINES = [
 export function Hero() {
   const reduced = useReducedMotion();
   const frame = useRef<HTMLDivElement>(null);
-  const hero = getProduct("chikankari-blush-suit-set")!;
+  const hero = getProduct("sozni-ivory-pashmina")!;
 
   /* pointer → tilt */
   const px = useMotionValue(0.5);
@@ -168,7 +168,7 @@ export function Hero() {
             <motion.div style={{ x: reduced ? 0 : panX, y: reduced ? 0 : panY }}>
               <Image
                 src={hero.image}
-                alt={`${hero.name} — Lucknowi chikankari`}
+                alt={`${hero.name} — sozni hand embroidery`}
                 width={hero.width}
                 height={hero.height}
                 quality={90}

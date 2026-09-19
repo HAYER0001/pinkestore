@@ -64,7 +64,7 @@ export const GlyphLoom = (p: GlyphProps) => (
   </Glyph>
 );
 
-/** Needle and thread — sozni, chikankari */
+/** Needle and thread — sozni */
 export const GlyphNeedle = (p: GlyphProps) => (
   <Glyph {...p}>
     <path d="M20 4 8.5 15.5" />

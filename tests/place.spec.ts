@@ -56,11 +56,11 @@ test.describe("the place diagram", () => {
       const p = PLACES.find((x) => x.id === id)!;
       return project(p, 640, 470);
     };
-    /* Kashmir is north of Chandigarh; Mithila is east of Lucknow; the shop
-       sits between them. If the projection ever flips, this catches it. */
+    /* Kashmir is north of Chandigarh; Mithila is south-east of it. If the
+       projection ever flips, this catches it. */
     expect(at("kashmir").y).toBeLessThan(at("chandigarh").y);
-    expect(at("chandigarh").y).toBeLessThan(at("lucknow").y);
-    expect(at("lucknow").x).toBeLessThan(at("mithila").x);
+    expect(at("chandigarh").y).toBeLessThan(at("mithila").y);
+    expect(at("chandigarh").x).toBeLessThan(at("mithila").x);
     expect(at("kashmir").x).toBeLessThan(at("chandigarh").x);
   });
 
@@ -108,7 +108,7 @@ test.describe("the place diagram", () => {
       ),
     }));
 
-    expect(shape.paths, "one thread per origin, and nothing else").toBe(3);
+    expect(shape.paths, "one thread per origin, and nothing else").toBe(2);
     expect(shape.longest, "a path this long is an outline, not a thread").toBeLessThan(120);
     expect(shape.circles).toBeGreaterThanOrEqual(4);
   });

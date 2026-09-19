@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     template: "%s · The Pinkestore",
   },
   description:
-    "Hand-painted Mithila work, Kashmiri sozni and jamawar kani, Lucknowi chikankari. Every piece one of one, from Chandigarh.",
+    "Hand-painted Mithila work, Kashmiri sozni and jamawar kani, printed kairi. Every piece one of one, from Chandigarh.",
   robots: { index: true, follow: true },
 };
 

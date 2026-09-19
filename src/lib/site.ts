@@ -50,8 +50,6 @@ export const NAV: NavGroup[] = [
     label: "Shop",
     items: [
       { label: "The Collection", href: "/collection" },
-      { label: "Shawls", href: "/collection?category=shawl" },
-      { label: "Suit sets", href: "/collection?category=suit-set" },
     ],
   },
   {
@@ -112,7 +110,7 @@ export const PROMISES: Promise_[] = [
   },
   {
     title: "The printed one says printed",
-    body: "Four of our five pieces are made entirely by hand. The fifth is printed, and it is labelled printed in the index, in the menu, and on its own page — in the same type as everything else, not buried in a description.",
+    body: "Three of our four pieces are made entirely by hand. The fourth is printed, and it is labelled printed in the index, in the menu, and on its own page — in the same type as everything else, not buried in a description.",
     verifiedBy: "Tests assert the word appears on the craft index, the mega-menu and the technique page.",
   },
   {
@@ -175,12 +173,6 @@ const CARE_BY_CRAFT: Record<Craft, string[]> = {
     "Gentle hand wash in cold water with a mild detergent, or dry clean. Wash separately the first two or three times — printed grounds release colour early.",
     "Dry flat in shade. Direct sun on a black ground is the fastest way to a grey one.",
     "Press on the reverse, with a cloth between the iron and the print.",
-  ],
-  "lucknowi-chikankari": [
-    "Hand wash cold and alone, or dry clean. Chikankari on fine cotton is strong in the ground and delicate at the stitch.",
-    "Never wring. Press the water out between two towels and dry flat in shade.",
-    "Starch lightly if at all. Heavy starch stiffens the shadow-work and flattens the relief that makes the technique worth having.",
-    "Mukaish and pearl accents should be kept away from the iron entirely — press around them.",
   ],
 };
 
@@ -296,13 +288,13 @@ export const POLICIES: Record<string, PolicyDoc> = {
   about: {
     title: "About",
     display: ["A small shop", "in Chandigarh"],
-    standfirst: `${BRAND.name} sells handmade textiles from ${BRAND.city}, ${BRAND.state}. The work is not from here — it is from Mithila, from Kashmir, from Lucknow — and each piece is bought as a single object rather than ordered by the dozen.`,
+    standfirst: `${BRAND.name} sells handmade textiles from ${BRAND.city}, ${BRAND.state}. The work is not from here — it is from Mithila and from Kashmir — and each piece is bought as a single object rather than ordered by the dozen.`,
     sections: [
       {
         heading: "What we sell",
         body: [
-          "Shawls and suit sets in five techniques: hand-painted Madhubani from Mithila in Bihar, sozni embroidery and jamawar kani from Kashmir, chikankari from Lucknow, and printed kairi.",
-          "Four of those five are made entirely by hand. The fifth is printed, and it says so on its own page — a printed piece sold as handwork is the oldest trick in this trade and we are not going to run it.",
+          "Shawls in four techniques: hand-painted Madhubani from Mithila in Bihar, sozni embroidery and jamawar kani from Kashmir, and printed kairi.",
+          "Three of those four are made entirely by hand. The fourth is printed, and it says so on its own page — a printed piece sold as handwork is the oldest trick in this trade and we are not going to run it.",
           "Stock is literal. Where a piece says one, there is one.",
         ],
       },

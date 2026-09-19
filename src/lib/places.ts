@@ -15,7 +15,7 @@ import { CRAFTS, BRAND, type Craft } from "./catalog";
  *    coastline traced by eye is not a defensible way for an Indian business to
  *    take a position on a border, and this shop has no position to take.
  *
- * So this is explicitly a DIAGRAM, not a map: four places at their true
+ * So this is explicitly a DIAGRAM, not a map: three places at their true
  * relative latitude and longitude on an empty field, joined by thread. No
  * coastline, no borders, no claims. It also happens to be the more elegant
  * object — a constellation of origins rather than a country with pins in it.
@@ -51,15 +51,6 @@ export const PLACES: Place[] = [
     lon: 74.8,
     crafts: ["sozni-hand-embroidered", "jamawar-kani"],
     note: "Two of the slowest textile techniques in the country come from the same valley.",
-    kind: "origin",
-  },
-  {
-    id: "lucknow",
-    label: "Lucknow",
-    lat: 26.85,
-    lon: 80.95,
-    crafts: ["lucknowi-chikankari"],
-    note: "White-on-white shadow work, worked from the reverse of the cloth.",
     kind: "origin",
   },
   {
@@ -124,14 +115,6 @@ export const MATERIALS: Record<Craft, MaterialStory> = {
       "There is no pencil underneath. The line is laid down once.",
     ],
   },
-  "lucknowi-chikankari": {
-    ground: "Fine cotton",
-    body: [
-      "Chikankari is worked on cloth light enough to see through, because the technique depends on it: much of the stitching is done from the REVERSE, and the pattern reads as a shadow through the ground.",
-      "The outline is block-printed on first as a guide, then washed away entirely once the embroidery is finished. A piece that still shows blue printing lines was not finished properly.",
-      "Mukaish and pearl are added on the face, which is why those areas must never meet an iron.",
-    ],
-  },
   "kairi-print": {
     ground: "Printed cloth",
     body: [
@@ -173,13 +156,6 @@ export const PROCESS: Record<Craft, Step[]> = {
     { label: "The line", detail: "Contours are drawn freehand in the kachni mode. There is no pencil underneath and no second attempt." },
     { label: "The fill", detail: "Hatch and dot close every remaining space in the field." },
     { label: "Fixing", detail: "The pigment is set so it survives handling — though never soaking." },
-  ],
-  "lucknowi-chikankari": [
-    { label: "Block printing", detail: "The pattern is printed onto the cloth in washable blue as a guide." },
-    { label: "The embroidery", detail: "Stitches are worked, much of it from the reverse so the motif reads as a shadow." },
-    { label: "Mukaish and pearl", detail: "Metal and pearl accents are added on the face, where they are visible." },
-    { label: "The wash", detail: "The blue guide is washed out completely. Any left behind means it was rushed." },
-    { label: "Finishing", detail: "Cut, stitched into the final garment, and pressed around the accents." },
   ],
   "kairi-print": [
     { label: "Printing", detail: "The kairi field and its border stripes are printed onto the ground cloth." },

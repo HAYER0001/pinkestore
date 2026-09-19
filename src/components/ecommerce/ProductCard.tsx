@@ -87,7 +87,7 @@ export function ProductCard({
               "linear-gradient(to top, rgba(12,10,8,0.94) 0%, rgba(12,10,8,0.62) 38%, rgba(12,10,8,0) 100%)",
           }}
           /* 0.55 at rest was fine over the dark jamawar and illegible over the
-             pale sozni and chikankari. The scrim has to be sized for the
+             pale sozni. The scrim has to be sized for the
              LIGHTEST photograph in the set, not the average one. */
           animate={{ opacity: hot ? 1 : 0.88 }}
           transition={DRIFT}
