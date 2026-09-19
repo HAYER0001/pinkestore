@@ -176,7 +176,10 @@ sides can quote it, but nothing is stored anywhere.
 - **Newsletter**: do you want one? Resend is already in the stack. About an hour
   once you say yes and there is an API key. I left the field out entirely
   rather than ship a form that posts nowhere
-- **Ambient audio**: no track installed, so the Sound control is disabled
+- **Ambient audio**: your track (`pankajsethjmt-indian-beats-3-494269.mp3`, 39s) is now the
+  bed — loudness-normalised to a gentle level and faded at the loop seam. The
+  filename looks like a stock-library download: keep its licence page somewhere,
+  and if it needs attribution tell me and I will add it to `/about`
 - **Press or collectors**, if any exist — real ones only
 - **Packaging**: what does a piece actually arrive in? Roadmap item 10 wants
   packaging treated as part of the brand, and I will not invent a box
